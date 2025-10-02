@@ -1,0 +1,721 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>API Google Sheet - CRUD</title>
+  <style>
+    body {
+      box-sizing: border-box;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
+      min-height: 100vh;
+    }
+    
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+      padding: 2rem 1rem;
+    }
+    
+    .grid {
+      display: grid;
+      gap: 2rem;
+    }
+    
+    @media (min-width: 1024px) {
+      .grid {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+    
+    .card {
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+      padding: 1.5rem;
+    }
+    
+    .header {
+      text-align: center;
+      margin-bottom: 2rem;
+    }
+    
+    .title {
+      font-size: 2.5rem;
+      font-weight: bold;
+      color: #1f2937;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .subtitle {
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .section-title {
+      font-size: 1.5rem;
+      font-weight: 600;
+      color: #1f2937;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+    }
+    
+    .icon {
+      background: #dbeafe;
+      padding: 0.5rem;
+      border-radius: 8px;
+      margin-right: 0.75rem;
+      font-size: 1rem;
+    }
+    
+    .icon.green {
+      background: #dcfce7;
+    }
+    
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    
+    .form-label {
+      display: block;
+      font-size: 0.875rem;
+      font-weight: 500;
+      color: #374151;
+      margin-bottom: 0.25rem;
+    }
+    
+    .form-input, .form-textarea {
+      width: 100%;
+      padding: 0.75rem 1rem;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 1rem;
+      transition: all 0.2s;
+      box-sizing: border-box;
+    }
+    
+    .form-input:focus, .form-textarea:focus {
+      outline: none;
+      border-color: #3b82f6;
+      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    }
+    
+    .form-textarea {
+      resize: none;
+      font-family: inherit;
+    }
+    
+    .grid-cols-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 1rem;
+    }
+    
+    .button-group {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.75rem;
+      margin-top: 1.5rem;
+    }
+    
+    .btn {
+      flex: 1;
+      padding: 0.75rem 1.5rem;
+      border: none;
+      border-radius: 8px;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1rem;
+      min-width: 120px;
+    }
+    
+    .btn-green {
+      background: #16a34a;
+      color: white;
+    }
+    
+    .btn-green:hover {
+      background: #15803d;
+    }
+    
+    .btn-blue {
+      background: #2563eb;
+      color: white;
+    }
+    
+    .btn-blue:hover {
+      background: #1d4ed8;
+    }
+    
+    .btn-red {
+      background: #dc2626;
+      color: white;
+    }
+    
+    .btn-red:hover {
+      background: #b91c1c;
+    }
+    
+    .btn-indigo {
+      background: #4f46e5;
+      color: white;
+    }
+    
+    .btn-indigo:hover {
+      background: #4338ca;
+    }
+    
+    .section-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 1.5rem;
+    }
+    
+    .table-container {
+      overflow-x: auto;
+    }
+    
+    .table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+      border-radius: 8px;
+      overflow: hidden;
+      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+    }
+    
+    .table th {
+      background: #f9fafb;
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem 1rem;
+      text-align: left;
+      font-size: 0.875rem;
+      font-weight: 600;
+      color: #374151;
+    }
+    
+    .table td {
+      border: 1px solid #e5e7eb;
+      padding: 0.75rem 1rem;
+      font-size: 0.875rem;
+    }
+    
+    .table tr:hover {
+      background: #f9fafb;
+    }
+    
+    .btn-small {
+      background: #dbeafe;
+      color: #1d4ed8;
+      padding: 0.25rem 0.75rem;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.75rem;
+      font-weight: 500;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+    
+    .btn-small:hover {
+      background: #bfdbfe;
+    }
+    
+    .loading {
+      opacity: 0.6;
+      pointer-events: none;
+    }
+    
+    .fade-in {
+      animation: fadeIn 0.3s ease-in;
+    }
+    
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .loading-state {
+      text-align: center;
+      padding: 2rem 0;
+    }
+    
+    .spinner {
+      display: inline-block;
+      width: 2rem;
+      height: 2rem;
+      border: 2px solid #e5e7eb;
+      border-top: 2px solid #4f46e5;
+      border-radius: 50%;
+      animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+    
+    .empty-state {
+      text-align: center;
+      padding: 3rem 0;
+    }
+    
+    .empty-icon {
+      font-size: 4rem;
+      margin-bottom: 1rem;
+    }
+    
+    .empty-title {
+      font-size: 1.125rem;
+      font-weight: 500;
+      color: #374151;
+      margin: 0 0 0.5rem 0;
+    }
+    
+    .empty-text {
+      color: #6b7280;
+      margin: 0;
+    }
+    
+    .message-container {
+      position: fixed;
+      top: 1rem;
+      right: 1rem;
+      z-index: 50;
+    }
+    
+    .message {
+      padding: 0.75rem 1.5rem;
+      border-radius: 8px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+      margin-bottom: 0.5rem;
+      color: white;
+      font-weight: 500;
+    }
+    
+    .message.success {
+      background: #16a34a;
+    }
+    
+    .message.error {
+      background: #dc2626;
+    }
+    
+    .message.info {
+      background: #2563eb;
+    }
+    
+    .hidden {
+      display: none;
+    }
+    
+    @media (max-width: 768px) {
+      .container {
+        padding: 1rem;
+      }
+      
+      .title {
+        font-size: 2rem;
+      }
+      
+      .button-group {
+        flex-direction: column;
+      }
+      
+      .btn {
+        flex: none;
+      }
+      
+      .grid-cols-2 {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <!-- Header -->
+    <div class="header">
+      <h1 class="title">📊 Google Sheets CRUD</h1>
+      <p class="subtitle">Kelola data kendaraan dengan mudah</p>
+    </div>
+
+    <div class="grid">
+      <!-- Form Section -->
+      <div class="card">
+        <h2 class="section-title">
+          <span class="icon">✏️</span>
+          Tambah / Edit Data
+        </h2>
+        
+        <div>
+          <div class="form-group">
+            <label class="form-label">Tanggal</label>
+            <input id="tanggal" type="date" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">INV</label>
+            <input id="inv" type="text" placeholder="Masukkan nomor INV" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Plat Nomor</label>
+            <input id="platno" type="text" placeholder="Contoh: B 1234 ABC" class="form-input">
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Lokasi</label>
+            <input id="lokasi" type="text" placeholder="Masukkan lokasi" class="form-input">
+          </div>
+          
+          <div class="grid-cols-2">
+            <div class="form-group">
+              <label class="form-label">Jam Mulai</label>
+              <input id="jam_mulai" type="time" class="form-input">
+            </div>
+            <div class="form-group">
+              <label class="form-label">Jam Selesai</label>
+              <input id="jam_selesai" type="time" class="form-input">
+            </div>
+          </div>
+          
+          <div class="form-group">
+            <label class="form-label">Catatan</label>
+            <textarea id="catatan" placeholder="Tambahkan catatan (opsional)" rows="3" class="form-textarea"></textarea>
+          </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="button-group">
+          <button onclick="addData()" class="btn btn-green">
+            <span style="margin-right: 0.5rem;">➕</span> Tambah Data
+          </button>
+          <button onclick="editData()" class="btn btn-blue">
+            <span style="margin-right: 0.5rem;">✏️</span> Edit Data
+          </button>
+          <button onclick="deleteData()" class="btn btn-red">
+            <span style="margin-right: 0.5rem;">🗑️</span> Hapus Data
+          </button>
+        </div>
+      </div>
+
+      <!-- Data Section -->
+      <div class="card">
+        <div class="section-header">
+          <h2 class="section-title">
+            <span class="icon green">📋</span>
+            Data Kendaraan
+          </h2>
+          <button onclick="getData()" id="refreshBtn" class="btn btn-indigo">
+            <span style="margin-right: 0.5rem;">🔄</span> Refresh
+          </button>
+        </div>
+
+        <!-- Loading State -->
+        <div id="loadingState" class="loading-state hidden">
+          <div class="spinner"></div>
+          <p style="margin-top: 0.5rem; color: #6b7280;">Memuat data...</p>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+          <table id="dataTable" class="table">
+            <thead>
+              <tr>
+                <th>Tanggal</th>
+                <th>INV</th>
+                <th>Plat No</th>
+                <th>Lokasi</th>
+                <th>Jam Mulai</th>
+                <th>Jam Selesai</th>
+                <th>Catatan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="tableBody">
+              <!-- Data will be populated here -->
+            </tbody>
+          </table>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state hidden">
+          <div class="empty-icon">📝</div>
+          <h3 class="empty-title">Belum ada data</h3>
+          <p class="empty-text">Tambahkan data pertama Anda menggunakan form di sebelah kiri</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Success/Error Messages -->
+    <div id="messageContainer" class="message-container"></div>
+  </div>
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbx7RToqbzDR4xPXeMAWW4ex68keldTvwQmRQ6J5NWSRlJ74zxcdFCoIeS-9HwvSkuTU/exec";
+
+    // Show loading state
+    function showLoading() {
+      document.getElementById('loadingState').classList.remove('hidden');
+      document.getElementById('dataTable').classList.add('loading');
+      document.getElementById('refreshBtn').classList.add('loading');
+    }
+
+    // Hide loading state
+    function hideLoading() {
+      document.getElementById('loadingState').classList.add('hidden');
+      document.getElementById('dataTable').classList.remove('loading');
+      document.getElementById('refreshBtn').classList.remove('loading');
+    }
+
+    // Show message
+    function showMessage(message, type = 'success') {
+      const container = document.getElementById('messageContainer');
+      const messageDiv = document.createElement('div');
+      const messageClass = type === 'success' ? 'success' : 'error';
+      
+      messageDiv.className = `message ${messageClass} fade-in`;
+      messageDiv.textContent = message;
+      
+      container.appendChild(messageDiv);
+      
+      setTimeout(() => {
+        messageDiv.remove();
+      }, 3000);
+    }
+
+    // Clear form
+    function clearForm() {
+      document.getElementById('tanggal').value = '';
+      document.getElementById('inv').value = '';
+      document.getElementById('platno').value = '';
+      document.getElementById('lokasi').value = '';
+      document.getElementById('jam_mulai').value = '';
+      document.getElementById('jam_selesai').value = '';
+      document.getElementById('catatan').value = '';
+    }
+
+    // Fill form with data for editing
+    function fillForm(data) {
+      document.getElementById('tanggal').value = data.tanggal;
+      document.getElementById('inv').value = data.inv;
+      document.getElementById('platno').value = data.platno;
+      document.getElementById('lokasi').value = data.lokasi;
+      document.getElementById('jam_mulai').value = data.jam_mulai;
+      document.getElementById('jam_selesai').value = data.jam_selesai;
+      document.getElementById('catatan').value = data.catatan;
+    }
+
+    // 🔍 Ambil data
+    async function getData() {
+      showLoading();
+      try {
+        const res = await fetch(API_URL, {
+          method: "GET",
+          mode: 'cors',
+          headers: { 
+            "Accept": "application/json"
+          }
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const data = await res.json();
+        const tbody = document.getElementById("tableBody");
+        const emptyState = document.getElementById("emptyState");
+        
+        tbody.innerHTML = "";
+        
+        if (!Array.isArray(data) || data.length === 0) {
+          emptyState.classList.remove('hidden');
+          document.getElementById('dataTable').classList.add('hidden');
+        } else {
+          emptyState.classList.add('hidden');
+          document.getElementById('dataTable').classList.remove('hidden');
+          
+          data.forEach(row => {
+            const tr = document.createElement("tr");
+            tr.innerHTML = `
+              <td>${row.tanggal || '-'}</td>
+              <td style="font-weight: 500;">${row.inv || '-'}</td>
+              <td>${row.platno || '-'}</td>
+              <td>${row.lokasi || '-'}</td>
+              <td>${row.jam_mulai || '-'}</td>
+              <td>${row.jam_selesai || '-'}</td>
+              <td>${row.catatan || '-'}</td>
+              <td>
+                <button onclick="fillForm(${JSON.stringify(row).replace(/"/g, '&quot;')})" class="btn-small">
+                  Edit
+                </button>
+              </td>
+            `;
+            tbody.appendChild(tr);
+          });
+        }
+      } catch (error) {
+        console.error('Get data error:', error);
+        if (error.message.includes('Failed to fetch')) {
+          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
+        } else {
+          showMessage('Gagal memuat data: ' + error.message, 'error');
+        }
+      } finally {
+        hideLoading();
+      }
+    }
+
+    // ✅ Tambah data
+    async function addData() {
+      const payload = collectForm("addData");
+      
+      if (!payload.inv || !payload.platno) {
+        showMessage('INV dan Plat Nomor harus diisi!', 'error');
+        return;
+      }
+      
+      try {
+        showMessage('Menambah data...', 'info');
+        
+        const res = await fetch(API_URL, {
+          method: "POST",
+          mode: 'cors',
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const result = await res.json();
+        showMessage(result.status || 'Data berhasil ditambahkan!');
+        clearForm();
+        getData();
+      } catch (error) {
+        console.error('Add data error:', error);
+        if (error.message.includes('Failed to fetch')) {
+          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
+        } else {
+          showMessage('Gagal menambah data: ' + error.message, 'error');
+        }
+      }
+    }
+
+    // ✏️ Edit data
+    async function editData() {
+      const payload = collectForm("editData");
+      
+      if (!payload.inv) {
+        showMessage('INV harus diisi untuk edit data!', 'error');
+        return;
+      }
+      
+      try {
+        showMessage('Mengedit data...', 'info');
+        
+        const res = await fetch(API_URL, {
+          method: "POST",
+          mode: 'cors',
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify(payload)
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const result = await res.json();
+        showMessage(result.status || 'Data berhasil diedit!');
+        clearForm();
+        getData();
+      } catch (error) {
+        console.error('Edit data error:', error);
+        if (error.message.includes('Failed to fetch')) {
+          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
+        } else {
+          showMessage('Gagal mengedit data: ' + error.message, 'error');
+        }
+      }
+    }
+
+    // 🗑 Hapus data
+    async function deleteData() {
+      const inv = document.getElementById("inv").value;
+      if (!inv) {
+        showMessage('Isi INV untuk hapus data!', 'error');
+        return;
+      }
+      
+      if (!confirm(`Yakin ingin menghapus data dengan INV: ${inv}?`)) {
+        return;
+      }
+      
+      try {
+        showMessage('Menghapus data...', 'info');
+        
+        const res = await fetch(API_URL, {
+          method: "POST",
+          mode: 'cors',
+          headers: { 
+            "Content-Type": "application/json",
+            "Accept": "application/json"
+          },
+          body: JSON.stringify({ action: "deleteData", inv })
+        });
+        
+        if (!res.ok) {
+          throw new Error(`HTTP error! status: ${res.status}`);
+        }
+        
+        const result = await res.json();
+        showMessage(result.status || 'Data berhasil dihapus!');
+        clearForm();
+        getData();
+      } catch (error) {
+        console.error('Delete data error:', error);
+        if (error.message.includes('Failed to fetch')) {
+          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
+        } else {
+          showMessage('Gagal menghapus data: ' + error.message, 'error');
+        }
+      }
+    }
+
+    // 📌 Kumpulkan data form
+    function collectForm(action) {
+      return {
+        action,
+        tanggal: document.getElementById("tanggal").value,
+        inv: document.getElementById("inv").value,
+        platno: document.getElementById("platno").value,
+        lokasi: document.getElementById("lokasi").value,
+        jam_mulai: document.getElementById("jam_mulai").value,
+        jam_selesai: document.getElementById("jam_selesai").value,
+        catatan: document.getElementById("catatan").value
+      };
+    }
+
+    // Initialize app
+    document.addEventListener('DOMContentLoaded', function() {
+      getData();
+    });
+  </script>
+<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98810017e318ce3d',t:'MTc1OTM3NDU2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+</html>

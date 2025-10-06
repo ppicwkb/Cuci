@@ -1,721 +1,865 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>API Google Sheet - CRUD</title>
-  <style>
-    body {
-      box-sizing: border-box;
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-      margin: 0;
-      padding: 0;
-      background: linear-gradient(135deg, #f0f9ff 0%, #e0e7ff 100%);
-      min-height: 100vh;
-    }
-    
-    .container {
-      max-width: 1200px;
-      margin: 0 auto;
-      padding: 2rem 1rem;
-    }
-    
-    .grid {
-      display: grid;
-      gap: 2rem;
-    }
-    
-    @media (min-width: 1024px) {
-      .grid {
-        grid-template-columns: 1fr 1fr;
-      }
-    }
-    
-    .card {
-      background: white;
-      border-radius: 12px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
-      padding: 1.5rem;
-    }
-    
-    .header {
-      text-align: center;
-      margin-bottom: 2rem;
-    }
-    
-    .title {
-      font-size: 2.5rem;
-      font-weight: bold;
-      color: #1f2937;
-      margin: 0 0 0.5rem 0;
-    }
-    
-    .subtitle {
-      color: #6b7280;
-      margin: 0;
-    }
-    
-    .section-title {
-      font-size: 1.5rem;
-      font-weight: 600;
-      color: #1f2937;
-      margin-bottom: 1.5rem;
-      display: flex;
-      align-items: center;
-    }
-    
-    .icon {
-      background: #dbeafe;
-      padding: 0.5rem;
-      border-radius: 8px;
-      margin-right: 0.75rem;
-      font-size: 1rem;
-    }
-    
-    .icon.green {
-      background: #dcfce7;
-    }
-    
-    .form-group {
-      margin-bottom: 1rem;
-    }
-    
-    .form-label {
-      display: block;
-      font-size: 0.875rem;
-      font-weight: 500;
-      color: #374151;
-      margin-bottom: 0.25rem;
-    }
-    
-    .form-input, .form-textarea {
-      width: 100%;
-      padding: 0.75rem 1rem;
-      border: 1px solid #d1d5db;
-      border-radius: 8px;
-      font-size: 1rem;
-      transition: all 0.2s;
-      box-sizing: border-box;
-    }
-    
-    .form-input:focus, .form-textarea:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
-    }
-    
-    .form-textarea {
-      resize: none;
-      font-family: inherit;
-    }
-    
-    .grid-cols-2 {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 1rem;
-    }
-    
-    .button-group {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 0.75rem;
-      margin-top: 1.5rem;
-    }
-    
-    .btn {
-      flex: 1;
-      padding: 0.75rem 1.5rem;
-      border: none;
-      border-radius: 8px;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      font-size: 1rem;
-      min-width: 120px;
-    }
-    
-    .btn-green {
-      background: #16a34a;
-      color: white;
-    }
-    
-    .btn-green:hover {
-      background: #15803d;
-    }
-    
-    .btn-blue {
-      background: #2563eb;
-      color: white;
-    }
-    
-    .btn-blue:hover {
-      background: #1d4ed8;
-    }
-    
-    .btn-red {
-      background: #dc2626;
-      color: white;
-    }
-    
-    .btn-red:hover {
-      background: #b91c1c;
-    }
-    
-    .btn-indigo {
-      background: #4f46e5;
-      color: white;
-    }
-    
-    .btn-indigo:hover {
-      background: #4338ca;
-    }
-    
-    .section-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
-    
-    .table-container {
-      overflow-x: auto;
-    }
-    
-    .table {
-      width: 100%;
-      border-collapse: collapse;
-      background: white;
-      border-radius: 8px;
-      overflow: hidden;
-      box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-    }
-    
-    .table th {
-      background: #f9fafb;
-      border: 1px solid #e5e7eb;
-      padding: 0.75rem 1rem;
-      text-align: left;
-      font-size: 0.875rem;
-      font-weight: 600;
-      color: #374151;
-    }
-    
-    .table td {
-      border: 1px solid #e5e7eb;
-      padding: 0.75rem 1rem;
-      font-size: 0.875rem;
-    }
-    
-    .table tr:hover {
-      background: #f9fafb;
-    }
-    
-    .btn-small {
-      background: #dbeafe;
-      color: #1d4ed8;
-      padding: 0.25rem 0.75rem;
-      border: none;
-      border-radius: 4px;
-      font-size: 0.75rem;
-      font-weight: 500;
-      cursor: pointer;
-      transition: all 0.2s;
-    }
-    
-    .btn-small:hover {
-      background: #bfdbfe;
-    }
-    
-    .loading {
-      opacity: 0.6;
-      pointer-events: none;
-    }
-    
-    .fade-in {
-      animation: fadeIn 0.3s ease-in;
-    }
-    
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(10px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    
-    .loading-state {
-      text-align: center;
-      padding: 2rem 0;
-    }
-    
-    .spinner {
-      display: inline-block;
-      width: 2rem;
-      height: 2rem;
-      border: 2px solid #e5e7eb;
-      border-top: 2px solid #4f46e5;
-      border-radius: 50%;
-      animation: spin 1s linear infinite;
-    }
-    
-    @keyframes spin {
-      0% { transform: rotate(0deg); }
-      100% { transform: rotate(360deg); }
-    }
-    
-    .empty-state {
-      text-align: center;
-      padding: 3rem 0;
-    }
-    
-    .empty-icon {
-      font-size: 4rem;
-      margin-bottom: 1rem;
-    }
-    
-    .empty-title {
-      font-size: 1.125rem;
-      font-weight: 500;
-      color: #374151;
-      margin: 0 0 0.5rem 0;
-    }
-    
-    .empty-text {
-      color: #6b7280;
-      margin: 0;
-    }
-    
-    .message-container {
-      position: fixed;
-      top: 1rem;
-      right: 1rem;
-      z-index: 50;
-    }
-    
-    .message {
-      padding: 0.75rem 1.5rem;
-      border-radius: 8px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
-      margin-bottom: 0.5rem;
-      color: white;
-      font-weight: 500;
-    }
-    
-    .message.success {
-      background: #16a34a;
-    }
-    
-    .message.error {
-      background: #dc2626;
-    }
-    
-    .message.info {
-      background: #2563eb;
-    }
-    
-    .hidden {
-      display: none;
-    }
-    
-    @media (max-width: 768px) {
-      .container {
-        padding: 1rem;
-      }
-      
-      .title {
-        font-size: 2rem;
-      }
-      
-      .button-group {
-        flex-direction: column;
-      }
-      
-      .btn {
-        flex: none;
-      }
-      
-      .grid-cols-2 {
-        grid-template-columns: 1fr;
-      }
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Input Data Cuci Kontainer</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            box-sizing: border-box;
+        }
+        .loading {
+            display: none;
+        }
+        .loading.show {
+            display: flex;
+        }
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
+            20%, 40%, 60%, 80% { transform: translateX(5px); }
+        }
+        @keyframes fadeInUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        .animate-fadeInUp {
+            animation: fadeInUp 0.6s ease-out;
+        }
+        .animate-slideInRight {
+            animation: slideInRight 0.5s ease-out;
+        }
+        .glass-effect {
+            backdrop-filter: blur(20px);
+            background: rgba(255, 255, 255, 0.95);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        .gradient-border {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2px;
+            border-radius: 12px;
+        }
+        .gradient-border-inner {
+            background: white;
+            border-radius: 10px;
+        }
+        .floating-label {
+            transition: all 0.3s ease;
+        }
+        .input-focused .floating-label {
+            transform: translateY(-24px) scale(0.85);
+            color: #4f46e5;
+        }
+        .custom-shadow {
+            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+        }
+        .hover-lift {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .hover-lift:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        }
+        .status-badge {
+            position: relative;
+            overflow: hidden;
+        }
+        .status-badge::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
+            transition: left 0.5s;
+        }
+        .status-badge:hover::before {
+            left: 100%;
+        }
+        @media (max-width: 640px) {
+            .mobile-padding {
+                padding-left: 1rem;
+                padding-right: 1rem;
+            }
+            .mobile-text {
+                font-size: 1.5rem;
+            }
+            .mobile-card {
+                margin: 0.5rem;
+                padding: 1.5rem;
+            }
+        }
+    </style>
 </head>
-<body>
-  <div class="container">
-    <!-- Header -->
-    <div class="header">
-      <h1 class="title">📊 Google Sheets CRUD</h1>
-      <p class="subtitle">Kelola data kendaraan dengan mudah</p>
+<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen font-sans relative overflow-x-hidden">
+    <!-- Background Pattern -->
+    <div class="fixed inset-0 opacity-5 pointer-events-none">
+        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25px 25px, #4f46e5 2px, transparent 0), radial-gradient(circle at 75px 75px, #7c3aed 2px, transparent 0); background-size: 100px 100px;"></div>
     </div>
-
-    <div class="grid">
-      <!-- Form Section -->
-      <div class="card">
-        <h2 class="section-title">
-          <span class="icon">✏️</span>
-          Tambah / Edit Data
-        </h2>
-        
-        <div>
-          <div class="form-group">
-            <label class="form-label">Tanggal</label>
-            <input id="tanggal" type="date" class="form-input">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">INV</label>
-            <input id="inv" type="text" placeholder="Masukkan nomor INV" class="form-input">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Plat Nomor</label>
-            <input id="platno" type="text" placeholder="Contoh: B 1234 ABC" class="form-input">
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Lokasi</label>
-            <input id="lokasi" type="text" placeholder="Masukkan lokasi" class="form-input">
-          </div>
-          
-          <div class="grid-cols-2">
-            <div class="form-group">
-              <label class="form-label">Jam Mulai</label>
-              <input id="jam_mulai" type="time" class="form-input">
+    <!-- Login Modal -->
+    <div id="loginModal" class="fixed inset-0 bg-gradient-to-br from-black/60 via-blue-900/20 to-purple-900/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+        <div class="glass-effect rounded-2xl custom-shadow p-8 max-w-md w-full mx-4 animate-fadeInUp">
+            <div class="text-center mb-8">
+                <div class="gradient-border mx-auto mb-6 w-20 h-20">
+                    <div class="gradient-border-inner w-full h-full flex items-center justify-center">
+                        <span class="text-3xl">🔐</span>
+                    </div>
+                </div>
+                <h2 class="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">Secure Access</h2>
+                <p class="text-gray-600 text-sm leading-relaxed">Masukkan kredensial untuk mengakses</p>
             </div>
-            <div class="form-group">
-              <label class="form-label">Jam Selesai</label>
-              <input id="jam_selesai" type="time" class="form-input">
-            </div>
-          </div>
-          
-          <div class="form-group">
-            <label class="form-label">Catatan</label>
-            <textarea id="catatan" placeholder="Tambahkan catatan (opsional)" rows="3" class="form-textarea"></textarea>
-          </div>
-        </div>
-
-        <!-- Action Buttons -->
-        <div class="button-group">
-          <button onclick="addData()" class="btn btn-green">
-            <span style="margin-right: 0.5rem;">➕</span> Tambah Data
-          </button>
-          <button onclick="editData()" class="btn btn-blue">
-            <span style="margin-right: 0.5rem;">✏️</span> Edit Data
-          </button>
-          <button onclick="deleteData()" class="btn btn-red">
-            <span style="margin-right: 0.5rem;">🗑️</span> Hapus Data
-          </button>
-        </div>
-      </div>
-
-      <!-- Data Section -->
-      <div class="card">
-        <div class="section-header">
-          <h2 class="section-title">
-            <span class="icon green">📋</span>
-            Data Kendaraan
-          </h2>
-          <button onclick="getData()" id="refreshBtn" class="btn btn-indigo">
-            <span style="margin-right: 0.5rem;">🔄</span> Refresh
-          </button>
-        </div>
-
-        <!-- Loading State -->
-        <div id="loadingState" class="loading-state hidden">
-          <div class="spinner"></div>
-          <p style="margin-top: 0.5rem; color: #6b7280;">Memuat data...</p>
-        </div>
-
-        <!-- Data Table -->
-        <div class="table-container">
-          <table id="dataTable" class="table">
-            <thead>
-              <tr>
-                <th>Tanggal</th>
-                <th>INV</th>
-                <th>Plat No</th>
-                <th>Lokasi</th>
-                <th>Jam Mulai</th>
-                <th>Jam Selesai</th>
-                <th>Catatan</th>
-                <th>Aksi</th>
-              </tr>
-            </thead>
-            <tbody id="tableBody">
-              <!-- Data will be populated here -->
-            </tbody>
-          </table>
-        </div>
-
-        <!-- Empty State -->
-        <div id="emptyState" class="empty-state hidden">
-          <div class="empty-icon">📝</div>
-          <h3 class="empty-title">Belum ada data</h3>
-          <p class="empty-text">Tambahkan data pertama Anda menggunakan form di sebelah kiri</p>
-        </div>
-      </div>
-    </div>
-
-    <!-- Success/Error Messages -->
-    <div id="messageContainer" class="message-container"></div>
-  </div>
-
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbx7RToqbzDR4xPXeMAWW4ex68keldTvwQmRQ6J5NWSRlJ74zxcdFCoIeS-9HwvSkuTU/exec";
-
-    // Show loading state
-    function showLoading() {
-      document.getElementById('loadingState').classList.remove('hidden');
-      document.getElementById('dataTable').classList.add('loading');
-      document.getElementById('refreshBtn').classList.add('loading');
-    }
-
-    // Hide loading state
-    function hideLoading() {
-      document.getElementById('loadingState').classList.add('hidden');
-      document.getElementById('dataTable').classList.remove('loading');
-      document.getElementById('refreshBtn').classList.remove('loading');
-    }
-
-    // Show message
-    function showMessage(message, type = 'success') {
-      const container = document.getElementById('messageContainer');
-      const messageDiv = document.createElement('div');
-      const messageClass = type === 'success' ? 'success' : 'error';
-      
-      messageDiv.className = `message ${messageClass} fade-in`;
-      messageDiv.textContent = message;
-      
-      container.appendChild(messageDiv);
-      
-      setTimeout(() => {
-        messageDiv.remove();
-      }, 3000);
-    }
-
-    // Clear form
-    function clearForm() {
-      document.getElementById('tanggal').value = '';
-      document.getElementById('inv').value = '';
-      document.getElementById('platno').value = '';
-      document.getElementById('lokasi').value = '';
-      document.getElementById('jam_mulai').value = '';
-      document.getElementById('jam_selesai').value = '';
-      document.getElementById('catatan').value = '';
-    }
-
-    // Fill form with data for editing
-    function fillForm(data) {
-      document.getElementById('tanggal').value = data.tanggal;
-      document.getElementById('inv').value = data.inv;
-      document.getElementById('platno').value = data.platno;
-      document.getElementById('lokasi').value = data.lokasi;
-      document.getElementById('jam_mulai').value = data.jam_mulai;
-      document.getElementById('jam_selesai').value = data.jam_selesai;
-      document.getElementById('catatan').value = data.catatan;
-    }
-
-    // 🔍 Ambil data
-    async function getData() {
-      showLoading();
-      try {
-        const res = await fetch(API_URL, {
-          method: "GET",
-          mode: 'cors',
-          headers: { 
-            "Accept": "application/json"
-          }
-        });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const data = await res.json();
-        const tbody = document.getElementById("tableBody");
-        const emptyState = document.getElementById("emptyState");
-        
-        tbody.innerHTML = "";
-        
-        if (!Array.isArray(data) || data.length === 0) {
-          emptyState.classList.remove('hidden');
-          document.getElementById('dataTable').classList.add('hidden');
-        } else {
-          emptyState.classList.add('hidden');
-          document.getElementById('dataTable').classList.remove('hidden');
-          
-          data.forEach(row => {
-            const tr = document.createElement("tr");
-            tr.innerHTML = `
-              <td>${row.tanggal || '-'}</td>
-              <td style="font-weight: 500;">${row.inv || '-'}</td>
-              <td>${row.platno || '-'}</td>
-              <td>${row.lokasi || '-'}</td>
-              <td>${row.jam_mulai || '-'}</td>
-              <td>${row.jam_selesai || '-'}</td>
-              <td>${row.catatan || '-'}</td>
-              <td>
-                <button onclick="fillForm(${JSON.stringify(row).replace(/"/g, '&quot;')})" class="btn-small">
-                  Edit
+            
+            <form id="loginForm" class="space-y-6">
+                <div class="space-y-5">
+                    <div class="relative">
+                        <label for="username" class="block text-sm font-semibold text-gray-700 mb-3">👤 Username</label>
+                        <input type="text" id="username" name="username" required placeholder="Masukkan username"
+                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
+                    </div>
+                    
+                    <div class="relative">
+                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-3">🔑 Password</label>
+                        <input type="password" id="password" name="password" required placeholder="Masukkan password"
+                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
+                    </div>
+                </div>
+                
+                <div id="loginError" class="hidden bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-800 p-4 rounded-xl text-sm animate-slideInRight">
+                    <div class="flex items-center">
+                        <span class="text-red-500 mr-2">⚠️</span>
+                        Username atau password salah. Silakan coba lagi.
+                    </div>
+                </div>
+                
+                <button type="submit" id="loginBtn"
+                        class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 transform hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 shadow-xl relative overflow-hidden group">
+                    <span class="relative z-10 flex items-center justify-center">
+                        <span class="mr-2"></span>
+                        Masuk ke Sistem
+                    </span>
+                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
                 </button>
-              </td>
-            `;
-            tbody.appendChild(tr);
-          });
-        }
-      } catch (error) {
-        console.error('Get data error:', error);
-        if (error.message.includes('Failed to fetch')) {
-          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
-        } else {
-          showMessage('Gagal memuat data: ' + error.message, 'error');
-        }
-      } finally {
-        hideLoading();
-      }
-    }
+            </form>
+        </div>
+    </div>
 
-    // ✅ Tambah data
-    async function addData() {
-      const payload = collectForm("addData");
-      
-      if (!payload.inv || !payload.platno) {
-        showMessage('INV dan Plat Nomor harus diisi!', 'error');
-        return;
-      }
-      
-      try {
-        showMessage('Menambah data...', 'info');
+    <div id="mainContent" class="hidden relative z-10">
+        <div class="container mx-auto mobile-padding py-6 sm:py-8 max-w-7xl">
+            <!-- Header -->
+            <div class="text-center mb-8 sm:mb-12 animate-fadeInUp">
+                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
+                    <div class="hidden sm:block"></div>
+                    <div class="text-center">
+                        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
+                            📋 DATA CUCI KONTAINER
+                        </h1>
+                        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
+                    </div>
+                    <button onclick="logout()" 
+                            class="bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 text-red-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 text-sm border border-red-200 hover:border-red-300 hover-lift">
+                        <span class="flex items-center">
+                            <span class="mr-2">🚪</span>
+                            Logout
+                        </span>
+                    </button>
+                </div>
+                <p class="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">Manajemen data Cuci kontainer</p>
+            </div>
+
+        <!-- Form Card -->
+        <div class="glass-effect rounded-2xl custom-shadow mobile-card mb-8 hover-lift animate-fadeInUp">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center mb-8">
+                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
+                        <span class="text-white text-xl">📝</span>
+                    </div>
+                    <div>
+                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Input Data </h2>
+                        <p class="text-gray-600 text-sm">Lengkapi data</p>
+                    </div>
+                </div>
+                
+                <form id="dataForm" class="space-y-6">
+                    <input type="hidden" id="row" name="row" value="">
+
+                    <!-- Grid Layout for Form Fields -->
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                        <!-- Tanggal -->
+                        <div class="lg:col-span-1">
+                            <label for="tanggal" class="block text-sm font-bold text-gray-700 mb-3">📅 Tanggal</label>
+                            <input type="date" id="tanggal" name="tanggal" required
+                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
+                        </div>
+
+                        <!-- INV -->
+                        <div class="lg:col-span-1">
+                            <label for="inv" class="block text-sm font-bold text-gray-700 mb-3">🏷️ Nomor INV</label>
+                            <input type="text" id="inv" name="inv" required placeholder="Masukkan nomor INV"
+                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
+                        </div>
+
+                        <!-- Plat -->
+                        <div class="lg:col-span-1">
+                            <label for="plat" class="block text-sm font-bold text-gray-700 mb-3">🚗 Plat Nomor</label>
+                            <input type="text" id="plat" name="plat" required placeholder="Contoh: B 1234 ABC"
+                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
+                        </div>
+
+                        <!-- Nomer -->
+                        <div class="lg:col-span-1">
+                            <label for="nomer" class="block text-sm font-bold text-gray-700 mb-3">🔢 Nomor Kontainer</label>
+                            <input type="text" id="nomer" name="nomer" placeholder="Nomor tambahan (opsional)"
+                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
+                        </div>
+
+                        <!-- Lokasi -->
+                        <div class="lg:col-span-1">
+                            <label for="lokasi" class="block text-sm font-bold text-gray-700 mb-3">📍 Lokasi</label>
+                            <select id="lokasi" name="lokasi"
+                                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
+                                <option value="">Pilih Lokasi</option>
+                                <option value="GIM">GIM</option>
+                                <option value="WKB">WKB</option>
+                            </select>
+                        </div>
+
+                        <!-- Jam Mulai & Selesai -->
+                        <div class="lg:col-span-1">
+                            <div class="grid grid-cols-2 gap-4">
+                                <div>
+                                    <label for="jamMulai" class="block text-sm font-bold text-gray-700 mb-3">⏰ Jam Mulai</label>
+                                    <input type="time" id="jamMulai" name="jamMulai"
+                                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
+                                </div>
+                                <div>
+                                    <label for="jamSelesai" class="block text-sm font-bold text-gray-700 mb-3">⏱️ Jam Selesai</label>
+                                    <input type="time" id="jamSelesai" name="jamSelesai"
+                                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Catatan - Full Width -->
+                    <div>
+                        <label for="catatan" class="block text-sm font-bold text-gray-700 mb-3">📝 Catatan</label>
+                        <textarea id="catatan" name="catatan" rows="4" placeholder="Tambahkan catatan atau keterangan tambahan..."
+                                  class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400 resize-none"></textarea>
+                    </div>
+
+                    <!-- Submit Button -->
+                    <div class="pt-6">
+                        <button type="submit" id="submitBtn"
+                                class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold py-5 px-8 rounded-xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 transform hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 shadow-xl relative overflow-hidden group">
+                            <span class="relative z-10 flex items-center justify-center text-lg">
+                                <span class="mr-3">💾</span>
+                                Simpan Data
+                            </span>
+                            <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
+                        </button>
+                    </div>
+                </form>
+            </div>
+
+            <!-- Loading Indicator -->
+            <div id="loading" class="loading fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
+                <div class="bg-white rounded-lg p-6 text-center">
+                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                    <p class="text-gray-700">Menyimpan data...</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Status Message -->
+        <div id="statusMessage" class="hidden p-4 rounded-lg text-center font-semibold"></div>
+
+        <!-- Data Display -->
+        <div class="glass-effect rounded-2xl custom-shadow mobile-card mb-8 hover-lift animate-fadeInUp">
+            <div class="p-6 sm:p-8">
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
+                    <div class="flex items-center">
+                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
+                            <span class="text-white text-xl">📊</span>
+                        </div>
+                        <div>
+                            <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Data Cuci kontainer</h3>
+                            <p class="text-gray-600 text-sm">Semua data yang tersimpan</p>
+                        </div>
+                    </div>
+                    <button onclick="loadData()" 
+                            class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 border border-blue-200 hover:border-blue-300 hover-lift">
+                        <span class="flex items-center">
+                            <span class="mr-2">🔄</span>
+                            Refresh Data
+                        </span>
+                    </button>
+                </div>
+            
+                <div id="dataContainer" class="rounded-xl">
+                    <div id="loadingData" class="text-center py-12 text-gray-500">
+                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
+                        <p class="text-lg font-medium">Memuat data...</p>
+                        <p class="text-sm text-gray-400 mt-1">Mohon tunggu sebentar</p>
+                    </div>
+                    <div id="noData" class="hidden text-center py-16 text-gray-500">
+                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
+                            <span class="text-3xl">📝</span>
+                        </div>
+                        <p class="text-lg font-medium mb-2">Belum ada data tersimpan</p>
+                        <p class="text-sm text-gray-400">Silakan tambahkan data baru menggunakan form di atas</p>
+                    </div>
+                    
+                    <!-- Data Table View -->
+                    <div id="dataTable" class="hidden">
+                        <div class="overflow-x-auto -mx-4 sm:mx-0">
+                            <div class="inline-block min-w-full align-middle">
+                                <table class="min-w-full text-xs sm:text-sm">
+                                    <thead>
+                                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">📅 Tanggal</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">🏷️ INV</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">🚗 Plat</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">🔢 Nomer</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">📍 Lokasi</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell">⏰ Jam</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell">📝 Catatan</th>
+                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">⚙️ Edit</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="dataTableBody" class="divide-y divide-gray-100">
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="glass-effect rounded-2xl custom-shadow mobile-card hover-lift animate-fadeInUp">
+            <div class="p-6 sm:p-8">
+                <div class="flex items-center mb-6">
+                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
+                        <span class="text-white text-xl">🚀</span>
+                    </div>
+                    <div>
+                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Pintasan</h3>
+                        <p class="text-gray-600 text-sm"> </p>
+                    </div>
+                </div>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <button onclick="clearForm()" 
+                            class="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-300 border border-gray-200 hover:border-gray-300 hover-lift group">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-3 group-hover:scale-110 transition-transform">🗑️</span>
+                            Bersihkan Form
+                        </span>
+                    </button>
+                    <button onclick="setCurrentDateTime()" 
+                            class="bg-gradient-to-r from-green-50 to-emerald-100 hover:from-green-100 hover:to-emerald-200 text-green-700 font-semibold py-4 px-6 rounded-xl transition-all duration-300 border border-green-200 hover:border-green-300 hover-lift group">
+                        <span class="flex items-center justify-center">
+                            <span class="mr-3 group-hover:scale-110 transition-transform">🕐</span>
+                            Set Waktu Sekarang
+                        </span>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    </div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqOy8S7COP1FgvDcV5_l0SxRj_m9QGYRx4L7RPMOTREfxuHzIRu7qGDWgsiDEutmQ6kQ/exec';
         
-        const res = await fetch(API_URL, {
-          method: "POST",
-          mode: 'cors',
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify(payload)
+        // Login credentials
+        const VALID_USERNAME = 'cuci';
+        const VALID_PASSWORD = '1';
+        
+        // Check if user is already logged in
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+            if (isLoggedIn) {
+                showMainContent();
+            } else {
+                showLoginModal();
+            }
+        }
+        
+        // Show login modal
+        function showLoginModal() {
+            document.getElementById('loginModal').classList.remove('hidden');
+            document.getElementById('mainContent').classList.add('hidden');
+        }
+        
+        // Show main content
+        function showMainContent() {
+            document.getElementById('loginModal').classList.add('hidden');
+            document.getElementById('mainContent').classList.remove('hidden');
+        }
+        
+        // Handle login form submission
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const username = document.getElementById('username').value;
+            const password = document.getElementById('password').value;
+            const loginError = document.getElementById('loginError');
+            
+            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+                // Login successful
+                localStorage.setItem('isLoggedIn', 'true');
+                showMainContent();
+                loginError.classList.add('hidden');
+                
+                // Clear form
+                document.getElementById('loginForm').reset();
+                
+                showMessage('✅ Login berhasil! Selamat datang.', 'success');
+            } else {
+                // Login failed
+                loginError.classList.remove('hidden');
+                
+                // Clear password field
+                document.getElementById('password').value = '';
+                
+                // Shake animation for error
+                const modal = document.querySelector('#loginModal > div');
+                modal.style.animation = 'shake 0.5s';
+                setTimeout(() => {
+                    modal.style.animation = '';
+                }, 500);
+            }
         });
         
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
+        // Logout function
+        function logout() {
+            localStorage.removeItem('isLoggedIn');
+            showLoginModal();
+            showMessage('👋 Anda telah logout. Sampai jumpa!', 'success');
         }
-        
-        const result = await res.json();
-        showMessage(result.status || 'Data berhasil ditambahkan!');
-        clearForm();
-        getData();
-      } catch (error) {
-        console.error('Add data error:', error);
-        if (error.message.includes('Failed to fetch')) {
-          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
-        } else {
-          showMessage('Gagal menambah data: ' + error.message, 'error');
-        }
-      }
-    }
 
-    // ✏️ Edit data
-    async function editData() {
-      const payload = collectForm("editData");
-      
-      if (!payload.inv) {
-        showMessage('INV harus diisi untuk edit data!', 'error');
-        return;
-      }
-      
-      try {
-        showMessage('Mengedit data...', 'info');
-        
-        const res = await fetch(API_URL, {
-          method: "POST",
-          mode: 'cors',
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify(payload)
+        // Handle form submission
+        document.getElementById('dataForm').addEventListener('submit', async function(e) {
+            e.preventDefault();
+            
+            const loading = document.getElementById('loading');
+            const submitBtn = document.getElementById('submitBtn');
+            const statusMessage = document.getElementById('statusMessage');
+            
+            // Show loading
+            loading.classList.add('show');
+            submitBtn.disabled = true;
+            
+            try {
+                const formData = new FormData(this);
+                
+                const response = await fetch(SCRIPT_URL, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    // Also save to localStorage for display
+                    saveToLocalStorage(formData);
+                    
+                    showMessage('✅ Data berhasil disimpan!', 'success');
+                    
+                    // Reset form if it's a new entry (not edit)
+                    if (!document.getElementById('row').value) {
+                        this.reset();
+                        // Set today's date again after reset
+                        const today = new Date().toISOString().split('T')[0];
+                        document.getElementById('tanggal').value = today;
+                    } else {
+                        // Clear edit mode
+                        document.getElementById('row').value = '';
+                        document.getElementById('submitBtn').textContent = '💾 Simpan Data';
+                    }
+                    
+                    // Refresh data display
+                    loadData();
+                } else {
+                    throw new Error('Gagal menyimpan data');
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                showMessage(' ', 'error');
+            } finally {
+                // Hide loading
+                loading.classList.remove('show');
+                submitBtn.disabled = false;
+            }
         });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const result = await res.json();
-        showMessage(result.status || 'Data berhasil diedit!');
-        clearForm();
-        getData();
-      } catch (error) {
-        console.error('Edit data error:', error);
-        if (error.message.includes('Failed to fetch')) {
-          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
-        } else {
-          showMessage('Gagal mengedit data: ' + error.message, 'error');
-        }
-      }
-    }
 
-    // 🗑 Hapus data
-    async function deleteData() {
-      const inv = document.getElementById("inv").value;
-      if (!inv) {
-        showMessage('Isi INV untuk hapus data!', 'error');
-        return;
-      }
-      
-      if (!confirm(`Yakin ingin menghapus data dengan INV: ${inv}?`)) {
-        return;
-      }
-      
-      try {
-        showMessage('Menghapus data...', 'info');
+        // Show status message
+        function showMessage(message, type) {
+            const statusMessage = document.getElementById('statusMessage');
+            statusMessage.textContent = message;
+            statusMessage.className = `p-4 rounded-lg text-center font-semibold ${
+                type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
+            }`;
+            statusMessage.classList.remove('hidden');
+            
+            // Hide after 5 seconds
+            setTimeout(() => {
+                statusMessage.classList.add('hidden');
+            }, 5000);
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('dataForm').reset();
+            document.getElementById('row').value = '';
+            document.getElementById('submitBtn').textContent = '💾 Simpan Data';
+        }
+
+        // Set current date and time
+        function setCurrentDateTime() {
+            const now = new Date();
+            
+            // Set current date
+            const today = now.toISOString().split('T')[0];
+            document.getElementById('tanggal').value = today;
+            
+            // Set current time for jam mulai
+            const currentTime = now.toTimeString().slice(0, 5);
+            document.getElementById('jamMulai').value = currentTime;
+        }
+
+        // Check URL parameters for edit mode
+        function checkEditMode() {
+            const urlParams = new URLSearchParams(window.location.search);
+            const row = urlParams.get('row');
+            
+            if (row) {
+                document.getElementById('row').value = row;
+                document.getElementById('submitBtn').textContent = '✏️ Update Data';
+                
+                // Fill form with URL parameters
+                ['tanggal', 'inv', 'plat', 'nomer', 'lokasi', 'jamMulai', 'jamSelesai', 'catatan'].forEach(field => {
+                    const value = urlParams.get(field);
+                    if (value) {
+                        document.getElementById(field).value = value;
+                    }
+                });
+            }
+        }
+
+        // Load data from Google Sheets
+        async function loadData() {
+            const loadingData = document.getElementById('loadingData');
+            const noData = document.getElementById('noData');
+            const dataTable = document.getElementById('dataTable');
+            const dataTableBody = document.getElementById('dataTableBody');
+            
+            // Show loading
+            loadingData.classList.remove('hidden');
+            noData.classList.add('hidden');
+            dataTable.classList.add('hidden');
+            
+            try {
+                // Google Sheets CSV export URL
+                const SHEET_ID = '1FO6iF8IBlTcl9AWVkqQO7lTct5C3avEb11gXeIllpuE';
+                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
+                
+                const response = await fetch(csvUrl);
+                const csvText = await response.text();
+                
+                // Parse CSV data
+                const rows = csvText.split('\n').filter(row => row.trim());
+                const data = [];
+                
+                // Skip header row and parse data
+                for (let i = 1; i < rows.length; i++) {
+                    const columns = parseCSVRow(rows[i]);
+                    if (columns.length >= 8 && columns[0]) { // Check if row has data
+                        data.push({
+                            tanggal: formatDate(columns[0]),
+                            inv: columns[1] || '',
+                            plat: columns[2] || '',
+                            nomer: columns[3] || '',
+                            lokasi: columns[4] || '',
+                            jamMulai: formatTime(columns[5]),
+                            jamSelesai: formatTime(columns[6]),
+                            catatan: columns[7] || ''
+                        });
+                    }
+                }
+                
+                if (data.length === 0) {
+                    loadingData.classList.add('hidden');
+                    noData.classList.remove('hidden');
+                    return;
+                }
+                
+                // Clear existing data
+                dataTableBody.innerHTML = '';
+                
+                // Populate table
+                data.forEach((row, index) => {
+                    const jamText = row.jamMulai && row.jamSelesai ? 
+                        `${row.jamMulai} - ${row.jamSelesai}` : 
+                        (row.jamMulai || row.jamSelesai || '-');
+                    
+                    // Table row
+                    const tr = document.createElement('tr');
+                    tr.className = 'hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300 group';
+                    
+                    tr.innerHTML = `
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-medium text-gray-800 text-xs sm:text-sm">${row.tanggal || '-'}</td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-bold text-blue-700 text-xs sm:text-sm">${row.inv || '-'}</td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-mono text-gray-700 text-xs sm:text-sm">${row.plat || '-'}</td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">${row.nomer || '-'}</td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4">
+                            <span class="status-badge px-2 sm:px-3 py-1 sm:py-2 text-xs font-bold rounded-full ${
+                                row.lokasi === 'GIM' ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' : 
+                                row.lokasi === 'WKB' ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300' : 
+                                'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300'
+                            }">${row.lokasi || '-'}</span>
+                        </td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 hidden md:table-cell">${jamText}</td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 max-w-xs hidden lg:table-cell">
+                            <div class="truncate" title="${row.catatan || ''}">${row.catatan ? (row.catatan.length > 20 ? row.catatan.substring(0, 20) + '...' : row.catatan) : '-'}</div>
+                        </td>
+                        <td class="px-2 sm:px-4 py-3 sm:py-4">
+                            <button onclick="editData(${index + 2})" 
+                                    class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-all duration-300 border border-blue-200 hover:border-blue-300 text-xs sm:text-sm hover-lift">
+                                <span class="flex items-center">
+                                    <span class="mr-1">✏️</span>
+                                    <span class="hidden sm:inline">Edit</span>
+                                </span>
+                            </button>
+                        </td>
+                    `;
+                    dataTableBody.appendChild(tr);
+                });
+                
+                loadingData.classList.add('hidden');
+                dataTable.classList.remove('hidden');
+                
+            } catch (error) {
+                console.error('Error loading data:', error);
+                loadingData.classList.add('hidden');
+                
+                // Fallback to localStorage if Google Sheets fails
+                const savedData = JSON.parse(localStorage.getItem('vehicleData') || '[]');
+                if (savedData.length > 0) {
+                    // Clear existing data
+                    dataTableBody.innerHTML = '';
+                    
+                    // Show localStorage data as fallback
+                    savedData.forEach((row, index) => {
+                        const jamText = row.jamMulai && row.jamSelesai ? 
+                            `${row.jamMulai} - ${row.jamSelesai}` : 
+                            (row.jamMulai || row.jamSelesai || '-');
+                        
+                        // Table row
+                        const tr = document.createElement('tr');
+                        tr.className = 'hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300 group';
+                        
+                        tr.innerHTML = `
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-medium text-gray-800 text-xs sm:text-sm">${row.tanggal || '-'}</td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-bold text-blue-700 text-xs sm:text-sm">${row.inv || '-'}</td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-mono text-gray-700 text-xs sm:text-sm">${row.plat || '-'}</td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">${row.nomer || '-'}</td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4">
+                                <span class="status-badge px-2 sm:px-3 py-1 sm:py-2 text-xs font-bold rounded-full ${
+                                    row.lokasi === 'GIM' ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' : 
+                                    row.lokasi === 'WKB' ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300' : 
+                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300'
+                                }">${row.lokasi || '-'}</span>
+                            </td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 hidden md:table-cell">${jamText}</td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 max-w-xs hidden lg:table-cell">
+                                <div class="truncate" title="${row.catatan || ''}">${row.catatan ? (row.catatan.length > 20 ? row.catatan.substring(0, 20) + '...' : row.catatan) : '-'}</div>
+                            </td>
+                            <td class="px-2 sm:px-4 py-3 sm:py-4">
+                                <button onclick="editData(${index})" 
+                                        class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-all duration-300 border border-blue-200 hover:border-blue-300 text-xs sm:text-sm hover-lift">
+                                    <span class="flex items-center">
+                                        <span class="mr-1">✏️</span>
+                                        <span class="hidden sm:inline">Edit</span>
+                                    </span>
+                                </button>
+                            </td>
+                        `;
+                        dataTableBody.appendChild(tr);
+                    });
+                    dataTable.classList.remove('hidden');
+                } else {
+                    noData.classList.remove('hidden');
+                }
+            }
+        }
         
-        const res = await fetch(API_URL, {
-          method: "POST",
-          mode: 'cors',
-          headers: { 
-            "Content-Type": "application/json",
-            "Accept": "application/json"
-          },
-          body: JSON.stringify({ action: "deleteData", inv })
+        // Helper functions for CSV parsing and formatting
+        function parseCSVRow(row) {
+            const result = [];
+            let current = '';
+            let inQuotes = false;
+            
+            for (let i = 0; i < row.length; i++) {
+                const char = row[i];
+                
+                if (char === '"') {
+                    inQuotes = !inQuotes;
+                } else if (char === ',' && !inQuotes) {
+                    result.push(current.trim());
+                    current = '';
+                } else {
+                    current += char;
+                }
+            }
+            
+            result.push(current.trim());
+            return result;
+        }
+        
+        function formatDate(dateStr) {
+            if (!dateStr) return '';
+            try {
+                const date = new Date(dateStr);
+                if (isNaN(date.getTime())) return dateStr;
+                return date.toISOString().split('T')[0];
+            } catch (e) {
+                return dateStr;
+            }
+        }
+        
+        function formatTime(timeStr) {
+            if (!timeStr) return '';
+            try {
+                // Handle various time formats
+                if (timeStr.includes(':')) {
+                    const parts = timeStr.split(':');
+                    if (parts.length >= 2) {
+                        const hours = parts[0].padStart(2, '0');
+                        const minutes = parts[1].padStart(2, '0');
+                        return `${hours}:${minutes}`;
+                    }
+                }
+                return timeStr;
+            } catch (e) {
+                return timeStr;
+            }
+        }
+        
+        // Edit data function
+        function editData(rowNumber) {
+            // Get the row data from the table
+            const tableRows = document.querySelectorAll('#dataTableBody tr');
+            const rowIndex = rowNumber - 2; // Adjust for header row
+            
+            if (rowIndex >= 0 && rowIndex < tableRows.length) {
+                const row = tableRows[rowIndex];
+                const cells = row.querySelectorAll('td');
+                
+                // Extract data from table cells
+                const tanggal = cells[0].textContent.trim();
+                const inv = cells[1].textContent.trim();
+                const plat = cells[2].textContent.trim();
+                const nomer = cells[3].textContent.trim();
+                const lokasi = cells[4].querySelector('span').textContent.trim();
+                const jamText = cells[5].textContent.trim();
+                const catatan = cells[6].textContent.trim();
+                
+                // Parse jam mulai and jam selesai
+                let jamMulai = '';
+                let jamSelesai = '';
+                if (jamText && jamText !== '-') {
+                    if (jamText.includes(' - ')) {
+                        const jamParts = jamText.split(' - ');
+                        jamMulai = jamParts[0].trim();
+                        jamSelesai = jamParts[1].trim();
+                    } else {
+                        jamMulai = jamText;
+                    }
+                }
+                
+                // Fill form with data
+                document.getElementById('tanggal').value = tanggal !== '-' ? tanggal : '';
+                document.getElementById('inv').value = inv !== '-' ? inv : '';
+                document.getElementById('plat').value = plat !== '-' ? plat : '';
+                document.getElementById('nomer').value = nomer !== '-' ? nomer : '';
+                document.getElementById('lokasi').value = lokasi !== '-' ? lokasi : '';
+                document.getElementById('jamMulai').value = jamMulai;
+                document.getElementById('jamSelesai').value = jamSelesai;
+                document.getElementById('catatan').value = catatan !== '-' ? catatan : '';
+                
+                // Set edit mode
+                document.getElementById('row').value = rowNumber;
+                document.getElementById('submitBtn').textContent = '✏️ Update Data';
+                
+                // Scroll to form
+                document.getElementById('dataForm').scrollIntoView({ behavior: 'smooth' });
+                
+                showMessage('📝 Data dimuat untuk diedit. Silakan ubah dan klik Update Data.', 'success');
+            } else {
+                showMessage('❌ Data tidak ditemukan untuk diedit.', 'error');
+            }
+        }
+        
+        // Save data to localStorage (for demo purposes)
+        function saveToLocalStorage(formData) {
+            const savedData = JSON.parse(localStorage.getItem('vehicleData') || '[]');
+            const newData = {
+                tanggal: formData.get('tanggal'),
+                inv: formData.get('inv'),
+                plat: formData.get('plat'),
+                nomer: formData.get('nomer'),
+                lokasi: formData.get('lokasi'),
+                jamMulai: formData.get('jamMulai'),
+                jamSelesai: formData.get('jamSelesai'),
+                catatan: formData.get('catatan')
+            };
+            
+            const rowIndex = formData.get('row');
+            if (rowIndex !== '' && rowIndex !== null) {
+                // Update existing data
+                savedData[parseInt(rowIndex)] = newData;
+            } else {
+                // Add new data
+                savedData.push(newData);
+            }
+            
+            localStorage.setItem('vehicleData', JSON.stringify(savedData));
+        }
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            // Check login status first
+            checkLoginStatus();
+            
+            checkEditMode();
+            loadData(); // Load data on page load
+            
+            // Set today's date as default
+            if (!document.getElementById('tanggal').value) {
+                const today = new Date().toISOString().split('T')[0];
+                document.getElementById('tanggal').value = today;
+            }
         });
-        
-        if (!res.ok) {
-          throw new Error(`HTTP error! status: ${res.status}`);
-        }
-        
-        const result = await res.json();
-        showMessage(result.status || 'Data berhasil dihapus!');
-        clearForm();
-        getData();
-      } catch (error) {
-        console.error('Delete data error:', error);
-        if (error.message.includes('Failed to fetch')) {
-          showMessage('Koneksi gagal. Pastikan URL Google Apps Script sudah benar dan dapat diakses.', 'error');
-        } else {
-          showMessage('Gagal menghapus data: ' + error.message, 'error');
-        }
-      }
-    }
-
-    // 📌 Kumpulkan data form
-    function collectForm(action) {
-      return {
-        action,
-        tanggal: document.getElementById("tanggal").value,
-        inv: document.getElementById("inv").value,
-        platno: document.getElementById("platno").value,
-        lokasi: document.getElementById("lokasi").value,
-        jam_mulai: document.getElementById("jam_mulai").value,
-        jam_selesai: document.getElementById("jam_selesai").value,
-        catatan: document.getElementById("catatan").value
-      };
-    }
-
-    // Initialize app
-    document.addEventListener('DOMContentLoaded', function() {
-      getData();
-    });
-  </script>
-<script>(function(){function c(){var b=a.contentDocument||a.contentWindow.document;if(b){var d=b.createElement('script');d.innerHTML="window.__CF$cv$params={r:'98810017e318ce3d',t:'MTc1OTM3NDU2MC4wMDAwMDA='};var a=document.createElement('script');a.nonce='';a.src='/cdn-cgi/challenge-platform/scripts/jsd/main.js';document.getElementsByTagName('head')[0].appendChild(a);";b.getElementsByTagName('head')[0].appendChild(d)}}if(document.body){var a=document.createElement('iframe');a.height=1;a.width=1;a.style.position='absolute';a.style.top=0;a.style.left=0;a.style.border='none';a.style.visibility='hidden';document.body.appendChild(a);if('loading'!==document.readyState)c();else if(window.addEventListener)document.addEventListener('DOMContentLoaded',c);else{var e=document.onreadystatechange||function(){};document.onreadystatechange=function(b){e(b);'loading'!==document.readyState&&(document.onreadystatechange=e,c())}}}})();</script></body>
+    </script>
+    </body>
 </html>

@@ -1,865 +1,860 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Input Data Cuci Kontainer</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body {
-            box-sizing: border-box;
-        }
-        .loading {
-            display: none;
-        }
-        .loading.show {
-            display: flex;
-        }
-        @keyframes shake {
-            0%, 100% { transform: translateX(0); }
-            10%, 30%, 50%, 70%, 90% { transform: translateX(-5px); }
-            20%, 40%, 60%, 80% { transform: translateX(5px); }
-        }
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-        @keyframes slideInRight {
-            from {
-                opacity: 0;
-                transform: translateX(30px);
-            }
-            to {
-                opacity: 1;
-                transform: translateX(0);
-            }
-        }
-        .animate-fadeInUp {
-            animation: fadeInUp 0.6s ease-out;
-        }
-        .animate-slideInRight {
-            animation: slideInRight 0.5s ease-out;
-        }
-        .glass-effect {
-            backdrop-filter: blur(20px);
-            background: rgba(255, 255, 255, 0.95);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-        .gradient-border {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            padding: 2px;
-            border-radius: 12px;
-        }
-        .gradient-border-inner {
-            background: white;
-            border-radius: 10px;
-        }
-        .floating-label {
-            transition: all 0.3s ease;
-        }
-        .input-focused .floating-label {
-            transform: translateY(-24px) scale(0.85);
-            color: #4f46e5;
-        }
-        .custom-shadow {
-            box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-        }
-        .hover-lift {
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        .hover-lift:hover {
-            transform: translateY(-4px);
-            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
-        }
-        .status-badge {
-            position: relative;
-            overflow: hidden;
-        }
-        .status-badge::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: -100%;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.3), transparent);
-            transition: left 0.5s;
-        }
-        .status-badge:hover::before {
-            left: 100%;
-        }
-        @media (max-width: 640px) {
-            .mobile-padding {
-                padding-left: 1rem;
-                padding-right: 1rem;
-            }
-            .mobile-text {
-                font-size: 1.5rem;
-            }
-            .mobile-card {
-                margin: 0.5rem;
-                padding: 1.5rem;
-            }
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sistem Pencatatan cuci kontainer</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .login-overlay {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.8);
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      z-index: 9999;
+    }
+
+    .login-modal {
+      background: white;
+      padding: 40px;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      max-width: 400px;
+      width: 90%;
+      animation: modalSlideIn 0.3s ease;
+    }
+
+    @keyframes modalSlideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-50px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .login-modal h2 {
+      color: #667eea;
+      margin-bottom: 10px;
+      text-align: center;
+      font-size: 2em;
+    }
+
+    .login-modal p {
+      text-align: center;
+      color: #6c757d;
+      margin-bottom: 30px;
+    }
+
+    .login-form .form-group {
+      margin-bottom: 20px;
+    }
+
+    .login-form label {
+      display: block;
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #495057;
+    }
+
+    .login-form input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+
+    .login-form input:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .login-error {
+      background: #f8d7da;
+      color: #721c24;
+      padding: 10px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      text-align: center;
+    }
+
+    .content-wrapper {
+      display: none;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+      background: white;
+      border-radius: 15px;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+      overflow: hidden;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 30px;
+      text-align: center;
+    }
+
+    .header h1 {
+      font-size: 2.5em;
+      margin-bottom: 10px;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .header p {
+      opacity: 0.9;
+      font-size: 1.1em;
+    }
+
+    .content {
+      padding: 30px;
+    }
+
+    .form-section {
+      background: #f8f9fa;
+      padding: 25px;
+      border-radius: 10px;
+      margin-bottom: 30px;
+      border: 2px solid #e9ecef;
+    }
+
+    .form-section h2 {
+      color: #667eea;
+      margin-bottom: 20px;
+      font-size: 1.5em;
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .form-group label {
+      font-weight: 600;
+      margin-bottom: 8px;
+      color: #495057;
+    }
+
+    .form-group input,
+    .form-group textarea,
+    .form-group select {
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 1em;
+      transition: all 0.3s ease;
+    }
+
+    .form-group input:focus,
+    .form-group textarea:focus,
+    .form-group select:focus {
+      outline: none;
+      border-color: #667eea;
+      box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+    }
+
+    .form-group textarea {
+      resize: vertical;
+      min-height: 80px;
+      grid-column: 1 / -1;
+    }
+
+    .button-group {
+      display: flex;
+      gap: 15px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 12px 30px;
+      border: none;
+      border-radius: 8px;
+      font-size: 1em;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.3s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .btn-primary {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+      color: white;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+      transform: translateY(-2px);
+    }
+
+    .btn-danger {
+      background: #dc3545;
+      color: white;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+      transform: translateY(-2px);
+    }
+
+    .btn-success {
+      background: #28a745;
+      color: white;
+    }
+
+    .btn-success:hover {
+      background: #218838;
+      transform: translateY(-2px);
+    }
+
+    .table-section {
+      margin-top: 30px;
+    }
+
+    .table-controls {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+      flex-wrap: wrap;
+      gap: 15px;
+    }
+
+    .search-box {
+      flex: 1;
+      min-width: 250px;
+      max-width: 400px;
+    }
+
+    .search-box input {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #dee2e6;
+      border-radius: 8px;
+      font-size: 1em;
+    }
+
+    .table-wrapper {
+      overflow-x: auto;
+      border-radius: 10px;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background: white;
+    }
+
+    thead {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+    }
+
+    th {
+      padding: 15px;
+      text-align: left;
+      font-weight: 600;
+      white-space: nowrap;
+    }
+
+    td {
+      padding: 12px 15px;
+      border-bottom: 1px solid #e9ecef;
+    }
+
+    tbody tr {
+      transition: background-color 0.2s ease;
+    }
+
+    tbody tr:hover {
+      background-color: #f8f9fa;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 0.875em;
+    }
+
+    .message {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+      display: none;
+      animation: slideIn 0.3s ease;
+    }
+
+    .message.success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    @keyframes slideIn {
+      from {
+        opacity: 0;
+        transform: translateY(-10px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    .loading {
+      display: none;
+      text-align: center;
+      padding: 20px;
+      color: #667eea;
+      font-weight: 600;
+    }
+
+    .spinner {
+      border: 4px solid #f3f3f3;
+      border-top: 4px solid #667eea;
+      border-radius: 50%;
+      width: 40px;
+      height: 40px;
+      animation: spin 1s linear infinite;
+      margin: 0 auto 10px;
+    }
+
+    @keyframes spin {
+      0% { transform: rotate(0deg); }
+      100% { transform: rotate(360deg); }
+    }
+
+    .stats {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 20px;
+      margin-bottom: 30px;
+    }
+
+    .stat-card {
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      border-left: 4px solid #667eea;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+
+    .stat-card h3 {
+      color: #6c757d;
+      font-size: 0.9em;
+      margin-bottom: 10px;
+    }
+
+    .stat-card .value {
+      color: #667eea;
+      font-size: 2em;
+      font-weight: 700;
+    }
+
+    @media (max-width: 768px) {
+      .header h1 {
+        font-size: 1.8em;
+      }
+
+      .form-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .button-group {
+        flex-direction: column;
+      }
+
+      .btn {
+        width: 100%;
+        justify-content: center;
+      }
+
+      .table-controls {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .search-box {
+        max-width: 100%;
+      }
+    }
+  </style>
 </head>
-<body class="bg-gradient-to-br from-slate-50 via-blue-50 to-indigo-100 min-h-screen font-sans relative overflow-x-hidden">
-    <!-- Background Pattern -->
-    <div class="fixed inset-0 opacity-5 pointer-events-none">
-        <div class="absolute inset-0" style="background-image: radial-gradient(circle at 25px 25px, #4f46e5 2px, transparent 0), radial-gradient(circle at 75px 75px, #7c3aed 2px, transparent 0); background-size: 100px 100px;"></div>
-    </div>
-    <!-- Login Modal -->
-    <div id="loginModal" class="fixed inset-0 bg-gradient-to-br from-black/60 via-blue-900/20 to-purple-900/30 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-        <div class="glass-effect rounded-2xl custom-shadow p-8 max-w-md w-full mx-4 animate-fadeInUp">
-            <div class="text-center mb-8">
-                <div class="gradient-border mx-auto mb-6 w-20 h-20">
-                    <div class="gradient-border-inner w-full h-full flex items-center justify-center">
-                        <span class="text-3xl">🔐</span>
-                    </div>
-                </div>
-                <h2 class="text-3xl font-bold bg-gradient-to-r from-gray-800 to-gray-600 bg-clip-text text-transparent mb-3">Secure Access</h2>
-                <p class="text-gray-600 text-sm leading-relaxed">Masukkan kredensial untuk mengakses</p>
-            </div>
-            
-            <form id="loginForm" class="space-y-6">
-                <div class="space-y-5">
-                    <div class="relative">
-                        <label for="username" class="block text-sm font-semibold text-gray-700 mb-3">👤 Username</label>
-                        <input type="text" id="username" name="username" required placeholder="Masukkan username"
-                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
-                    </div>
-                    
-                    <div class="relative">
-                        <label for="password" class="block text-sm font-semibold text-gray-700 mb-3">🔑 Password</label>
-                        <input type="password" id="password" name="password" required placeholder="Masukkan password"
-                               class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
-                    </div>
-                </div>
-                
-                <div id="loginError" class="hidden bg-gradient-to-r from-red-50 to-red-100 border border-red-200 text-red-800 p-4 rounded-xl text-sm animate-slideInRight">
-                    <div class="flex items-center">
-                        <span class="text-red-500 mr-2">⚠️</span>
-                        Username atau password salah. Silakan coba lagi.
-                    </div>
-                </div>
-                
-                <button type="submit" id="loginBtn"
-                        class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold py-4 px-6 rounded-xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 transform hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 shadow-xl relative overflow-hidden group">
-                    <span class="relative z-10 flex items-center justify-center">
-                        <span class="mr-2"></span>
-                        Masuk ke Sistem
-                    </span>
-                    <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                </button>
-            </form>
+<body>
+  <!-- Login Modal -->
+  <div class="login-overlay" id="loginOverlay">
+    <div class="login-modal">
+      <h2>🔐 Login</h2>
+      <p>Data Cuci Kontainer</p>
+      <div class="login-error" id="loginError">Username atau password salah!</div>
+      <form class="login-form" id="loginForm">
+        <div class="form-group">
+          <label for="username">Username</label>
+          <input type="text" id="username" placeholder="Masukkan username" required autocomplete="username">
         </div>
+        <div class="form-group">
+          <label for="password">Password</label>
+          <input type="password" id="password" placeholder="Masukkan password" required autocomplete="current-password">
+        </div>
+        <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+          <span>🔓</span> Login
+        </button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Main Content -->
+  <div class="content-wrapper" id="mainContent">
+  <div class="container">
+    <div class="header">
+      <h1>🚿 Sistem Pencatatan</h1>
+      <p>data cuci kontainer</p>
     </div>
 
-    <div id="mainContent" class="hidden relative z-10">
-        <div class="container mx-auto mobile-padding py-6 sm:py-8 max-w-7xl">
-            <!-- Header -->
-            <div class="text-center mb-8 sm:mb-12 animate-fadeInUp">
-                <div class="flex flex-col sm:flex-row justify-between items-center mb-6 gap-4">
-                    <div class="hidden sm:block"></div>
-                    <div class="text-center">
-                        <h1 class="text-2xl sm:text-4xl lg:text-5xl font-bold bg-gradient-to-r from-gray-800 via-blue-800 to-indigo-800 bg-clip-text text-transparent mb-2">
-                            📋 DATA CUCI KONTAINER
-                        </h1>
-                        <div class="w-24 h-1 bg-gradient-to-r from-blue-500 to-indigo-600 mx-auto rounded-full"></div>
-                    </div>
-                    <button onclick="logout()" 
-                            class="bg-gradient-to-r from-red-50 to-red-100 hover:from-red-100 hover:to-red-200 text-red-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 text-sm border border-red-200 hover:border-red-300 hover-lift">
-                        <span class="flex items-center">
-                            <span class="mr-2">🚪</span>
-                            Logout
-                        </span>
-                    </button>
-                </div>
-                <p class="text-gray-600 text-lg max-w-2xl mx-auto leading-relaxed">Manajemen data Cuci kontainer</p>
-            </div>
+    <div class="content">
+      <div id="message" class="message"></div>
+      <div id="loading" class="loading">
+        <div class="spinner"></div>
+        <p>Memproses data...</p>
+      </div>
 
-        <!-- Form Card -->
-        <div class="glass-effect rounded-2xl custom-shadow mobile-card mb-8 hover-lift animate-fadeInUp">
-            <div class="p-6 sm:p-8">
-                <div class="flex items-center mb-8">
-                    <div class="w-12 h-12 bg-gradient-to-r from-blue-500 to-indigo-600 rounded-xl flex items-center justify-center mr-4">
-                        <span class="text-white text-xl">📝</span>
-                    </div>
-                    <div>
-                        <h2 class="text-xl sm:text-2xl font-bold text-gray-800">Input Data </h2>
-                        <p class="text-gray-600 text-sm">Lengkapi data</p>
-                    </div>
-                </div>
-                
-                <form id="dataForm" class="space-y-6">
-                    <input type="hidden" id="row" name="row" value="">
-
-                    <!-- Grid Layout for Form Fields -->
-                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                        <!-- Tanggal -->
-                        <div class="lg:col-span-1">
-                            <label for="tanggal" class="block text-sm font-bold text-gray-700 mb-3">📅 Tanggal</label>
-                            <input type="date" id="tanggal" name="tanggal" required
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
-                        </div>
-
-                        <!-- INV -->
-                        <div class="lg:col-span-1">
-                            <label for="inv" class="block text-sm font-bold text-gray-700 mb-3">🏷️ Nomor INV</label>
-                            <input type="text" id="inv" name="inv" required placeholder="Masukkan nomor INV"
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
-                        </div>
-
-                        <!-- Plat -->
-                        <div class="lg:col-span-1">
-                            <label for="plat" class="block text-sm font-bold text-gray-700 mb-3">🚗 Plat Nomor</label>
-                            <input type="text" id="plat" name="plat" required placeholder="Contoh: B 1234 ABC"
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
-                        </div>
-
-                        <!-- Nomer -->
-                        <div class="lg:col-span-1">
-                            <label for="nomer" class="block text-sm font-bold text-gray-700 mb-3">🔢 Nomor Kontainer</label>
-                            <input type="text" id="nomer" name="nomer" placeholder="Nomor tambahan (opsional)"
-                                   class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400">
-                        </div>
-
-                        <!-- Lokasi -->
-                        <div class="lg:col-span-1">
-                            <label for="lokasi" class="block text-sm font-bold text-gray-700 mb-3">📍 Lokasi</label>
-                            <select id="lokasi" name="lokasi"
-                                    class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
-                                <option value="">Pilih Lokasi</option>
-                                <option value="GIM">GIM</option>
-                                <option value="WKB">WKB</option>
-                            </select>
-                        </div>
-
-                        <!-- Jam Mulai & Selesai -->
-                        <div class="lg:col-span-1">
-                            <div class="grid grid-cols-2 gap-4">
-                                <div>
-                                    <label for="jamMulai" class="block text-sm font-bold text-gray-700 mb-3">⏰ Jam Mulai</label>
-                                    <input type="time" id="jamMulai" name="jamMulai"
-                                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
-                                </div>
-                                <div>
-                                    <label for="jamSelesai" class="block text-sm font-bold text-gray-700 mb-3">⏱️ Jam Selesai</label>
-                                    <input type="time" id="jamSelesai" name="jamSelesai"
-                                           class="w-full px-4 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800">
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Catatan - Full Width -->
-                    <div>
-                        <label for="catatan" class="block text-sm font-bold text-gray-700 mb-3">📝 Catatan</label>
-                        <textarea id="catatan" name="catatan" rows="4" placeholder="Tambahkan catatan atau keterangan tambahan..."
-                                  class="w-full px-5 py-4 border-2 border-gray-200 rounded-xl focus:ring-4 focus:ring-blue-500/20 focus:border-blue-500 transition-all duration-300 bg-white/80 backdrop-blur-sm text-gray-800 placeholder-gray-400 resize-none"></textarea>
-                    </div>
-
-                    <!-- Submit Button -->
-                    <div class="pt-6">
-                        <button type="submit" id="submitBtn"
-                                class="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white font-bold py-5 px-8 rounded-xl hover:from-blue-700 hover:via-blue-800 hover:to-indigo-800 transform hover:scale-[1.02] hover:shadow-2xl transition-all duration-300 shadow-xl relative overflow-hidden group">
-                            <span class="relative z-10 flex items-center justify-center text-lg">
-                                <span class="mr-3">💾</span>
-                                Simpan Data
-                            </span>
-                            <div class="absolute inset-0 bg-gradient-to-r from-white/0 via-white/20 to-white/0 transform -skew-x-12 -translate-x-full group-hover:translate-x-full transition-transform duration-700"></div>
-                        </button>
-                    </div>
-                </form>
-            </div>
-
-            <!-- Loading Indicator -->
-            <div id="loading" class="loading fixed inset-0 bg-black bg-opacity-50 items-center justify-center z-50">
-                <div class="bg-white rounded-lg p-6 text-center">
-                    <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-                    <p class="text-gray-700">Menyimpan data...</p>
-                </div>
-            </div>
+      <div class="stats" id="stats">
+        <div class="stat-card">
+          <h3>Total Kontainer</h3>
+          <div class="value" id="totalVehicles">0</div>
         </div>
+        <div class="stat-card">
+          <h3>Total GIM</h3>
+          <div class="value" id="gimCount">0</div>
+        </div>
+        <div class="stat-card">
+          <h3>Total WKB</h3>
+          <div class="value" id="wkbCount">0</div>
+        </div>
+      </div>
 
-        <!-- Status Message -->
-        <div id="statusMessage" class="hidden p-4 rounded-lg text-center font-semibold"></div>
-
-        <!-- Data Display -->
-        <div class="glass-effect rounded-2xl custom-shadow mobile-card mb-8 hover-lift animate-fadeInUp">
-            <div class="p-6 sm:p-8">
-                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center mb-6 gap-4">
-                    <div class="flex items-center">
-                        <div class="w-12 h-12 bg-gradient-to-r from-green-500 to-emerald-600 rounded-xl flex items-center justify-center mr-4">
-                            <span class="text-white text-xl">📊</span>
-                        </div>
-                        <div>
-                            <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Data Cuci kontainer</h3>
-                            <p class="text-gray-600 text-sm">Semua data yang tersimpan</p>
-                        </div>
-                    </div>
-                    <button onclick="loadData()" 
-                            class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-3 px-6 rounded-xl transition-all duration-300 border border-blue-200 hover:border-blue-300 hover-lift">
-                        <span class="flex items-center">
-                            <span class="mr-2">🔄</span>
-                            Refresh Data
-                        </span>
-                    </button>
-                </div>
-            
-                <div id="dataContainer" class="rounded-xl">
-                    <div id="loadingData" class="text-center py-12 text-gray-500">
-                        <div class="animate-spin rounded-full h-12 w-12 border-4 border-blue-200 border-t-blue-600 mx-auto mb-4"></div>
-                        <p class="text-lg font-medium">Memuat data...</p>
-                        <p class="text-sm text-gray-400 mt-1">Mohon tunggu sebentar</p>
-                    </div>
-                    <div id="noData" class="hidden text-center py-16 text-gray-500">
-                        <div class="w-20 h-20 bg-gray-100 rounded-full flex items-center justify-center mx-auto mb-4">
-                            <span class="text-3xl">📝</span>
-                        </div>
-                        <p class="text-lg font-medium mb-2">Belum ada data tersimpan</p>
-                        <p class="text-sm text-gray-400">Silakan tambahkan data baru menggunakan form di atas</p>
-                    </div>
-                    
-                    <!-- Data Table View -->
-                    <div id="dataTable" class="hidden">
-                        <div class="overflow-x-auto -mx-4 sm:mx-0">
-                            <div class="inline-block min-w-full align-middle">
-                                <table class="min-w-full text-xs sm:text-sm">
-                                    <thead>
-                                        <tr class="bg-gradient-to-r from-gray-50 to-gray-100 border-b-2 border-gray-200">
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">📅 Tanggal</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">🏷️ INV</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">🚗 Plat</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden sm:table-cell">🔢 Nomer</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">📍 Lokasi</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden md:table-cell">⏰ Jam</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm hidden lg:table-cell">📝 Catatan</th>
-                                            <th class="px-2 sm:px-4 py-3 sm:py-4 text-left font-bold text-gray-700 whitespace-nowrap text-xs sm:text-sm">⚙️ Edit</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="dataTableBody" class="divide-y divide-gray-100">
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+      <div class="form-section">
+        <h2 id="formTitle">📝 Tambah Data</h2>
+        <form id="vehicleForm">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="tanggal">Tanggal *</label>
+              <input type="date" id="tanggal" name="tanggal" required>
             </div>
-        </div>
-        </div>
-
-        <!-- Quick Actions -->
-        <div class="glass-effect rounded-2xl custom-shadow mobile-card hover-lift animate-fadeInUp">
-            <div class="p-6 sm:p-8">
-                <div class="flex items-center mb-6">
-                    <div class="w-12 h-12 bg-gradient-to-r from-purple-500 to-pink-600 rounded-xl flex items-center justify-center mr-4">
-                        <span class="text-white text-xl">🚀</span>
-                    </div>
-                    <div>
-                        <h3 class="text-xl sm:text-2xl font-bold text-gray-800">Pintasan</h3>
-                        <p class="text-gray-600 text-sm"> </p>
-                    </div>
-                </div>
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                    <button onclick="clearForm()" 
-                            class="bg-gradient-to-r from-gray-50 to-gray-100 hover:from-gray-100 hover:to-gray-200 text-gray-700 font-semibold py-4 px-6 rounded-xl transition-all duration-300 border border-gray-200 hover:border-gray-300 hover-lift group">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 group-hover:scale-110 transition-transform">🗑️</span>
-                            Bersihkan Form
-                        </span>
-                    </button>
-                    <button onclick="setCurrentDateTime()" 
-                            class="bg-gradient-to-r from-green-50 to-emerald-100 hover:from-green-100 hover:to-emerald-200 text-green-700 font-semibold py-4 px-6 rounded-xl transition-all duration-300 border border-green-200 hover:border-green-300 hover-lift group">
-                        <span class="flex items-center justify-center">
-                            <span class="mr-3 group-hover:scale-110 transition-transform">🕐</span>
-                            Set Waktu Sekarang
-                        </span>
-                    </button>
-                </div>
+            <div class="form-group">
+              <label for="inv">INV *</label>
+              <input type="text" id="inv" name="inv" placeholder="Nomor Invoice" required>
             </div>
+            <div class="form-group">
+              <label for="plat">Plat Nomor *</label>
+              <input type="text" id="plat" name="plat" placeholder="B 1234 XYZ" required>
+            </div>
+            <div class="form-group">
+              <label for="lokasi">Lokasi *</label>
+              <select id="lokasi" name="lokasi" required>
+                <option value="">Pilih Lokasi</option>
+                <option value="GIM">GIM</option>
+                <option value="WKB">WKB</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label for="jamMulai">Jam Mulai</label>
+              <input type="time" id="jamMulai" name="jamMulai">
+            </div>
+            <div class="form-group">
+              <label for="jamSelesai">Jam Selesai</label>
+              <input type="time" id="jamSelesai" name="jamSelesai">
+            </div>
+            <div class="form-group" style="grid-column: 1 / -1;">
+              <label for="catatan">Catatan</label>
+              <textarea id="catatan" name="catatan" placeholder="Tambahkan catatan jika diperlukan..."></textarea>
+            </div>
+          </div>
+          <div class="button-group">
+            <button type="submit" class="btn btn-primary">
+              <span>💾</span> Simpan Data
+            </button>
+            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+              <span>🔄</span> Reset Form
+            </button>
+            <button type="button" class="btn btn-success" onclick="refreshData()">
+              <span>↻</span> Refresh Data
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="table-section">
+        <div class="table-controls">
+          <h2>🗃️ Data Kendaraan</h2>
+          <div class="search-box">
+            <input type="text" id="searchInput" placeholder="🔍 Cari data..." onkeyup="searchTable()">
+          </div>
         </div>
+        <div class="table-wrapper">
+          <table id="dataTable">
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Tanggal</th>
+                <th>INV</th>
+                <th>Plat</th>
+                <th>Lokasi</th>
+                <th>Jam Mulai</th>
+                <th>Jam Selesai</th>
+                <th>Catatan</th>
+                <th>Aksi</th>
+              </tr>
+            </thead>
+            <tbody id="dataTableBody">
+              <tr>
+                <td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">
+                  Memuat data...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
     </div>
-    </div>
+  </div>
 
-    <script>
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbwqOy8S7COP1FgvDcV5_l0SxRj_m9QGYRx4L7RPMOTREfxuHzIRu7qGDWgsiDEutmQ6kQ/exec';
-        
-        // Login credentials
-        const VALID_USERNAME = 'cuci';
-        const VALID_PASSWORD = '1';
-        
-        // Check if user is already logged in
-        function checkLoginStatus() {
-            const isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-            if (isLoggedIn) {
-                showMainContent();
-            } else {
-                showLoginModal();
-            }
-        }
-        
-        // Show login modal
-        function showLoginModal() {
-            document.getElementById('loginModal').classList.remove('hidden');
-            document.getElementById('mainContent').classList.add('hidden');
-        }
-        
-        // Show main content
-        function showMainContent() {
-            document.getElementById('loginModal').classList.add('hidden');
-            document.getElementById('mainContent').classList.remove('hidden');
-        }
-        
-        // Handle login form submission
-        document.getElementById('loginForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            
-            const username = document.getElementById('username').value;
-            const password = document.getElementById('password').value;
-            const loginError = document.getElementById('loginError');
-            
-            if (username === VALID_USERNAME && password === VALID_PASSWORD) {
-                // Login successful
-                localStorage.setItem('isLoggedIn', 'true');
-                showMainContent();
-                loginError.classList.add('hidden');
-                
-                // Clear form
-                document.getElementById('loginForm').reset();
-                
-                showMessage('✅ Login berhasil! Selamat datang.', 'success');
-            } else {
-                // Login failed
-                loginError.classList.remove('hidden');
-                
-                // Clear password field
-                document.getElementById('password').value = '';
-                
-                // Shake animation for error
-                const modal = document.querySelector('#loginModal > div');
-                modal.style.animation = 'shake 0.5s';
-                setTimeout(() => {
-                    modal.style.animation = '';
-                }, 500);
-            }
+  <script>
+    const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzwh8TLM6eDaLMgoGC1SicdIlLBhMnRo2s82OY_SaRB9xKrLW3oY85euvo7G8duZS0m/exec';
+    let currentEditIndex = null;
+    let allData = [];
+    let isLoggedIn = false;
+
+    // Credentials
+    const VALID_USERNAME = 'cuci';
+    const VALID_PASSWORD = '1';
+
+    // Check login status on load
+    window.onload = function() {
+      checkLoginStatus();
+    };
+
+    // Handle login form
+    document.getElementById('loginForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const username = document.getElementById('username').value;
+      const password = document.getElementById('password').value;
+      
+      if (username === VALID_USERNAME && password === VALID_PASSWORD) {
+        login();
+      } else {
+        showLoginError();
+      }
+    });
+
+    function checkLoginStatus() {
+      const loginStatus = sessionStorage.getItem('vehicleSystemLogin');
+      if (loginStatus === 'true') {
+        isLoggedIn = true;
+        showMainContent();
+      }
+    }
+
+    function login() {
+      isLoggedIn = true;
+      sessionStorage.setItem('vehicleSystemLogin', 'true');
+      showMainContent();
+    }
+
+    function showMainContent() {
+      document.getElementById('loginOverlay').style.display = 'none';
+      document.getElementById('mainContent').style.display = 'block';
+      
+      // Set tanggal hari ini sebagai default
+      document.getElementById('tanggal').valueAsDate = new Date();
+      
+      // Load data
+      loadData();
+    }
+
+    function showLoginError() {
+      const errorEl = document.getElementById('loginError');
+      errorEl.style.display = 'block';
+      
+      setTimeout(() => {
+        errorEl.style.display = 'none';
+      }, 3000);
+      
+      // Clear password field
+      document.getElementById('password').value = '';
+    }
+
+    // Handle form submit
+    document.getElementById('vehicleForm').addEventListener('submit', function(e) {
+      e.preventDefault();
+      
+      const formData = {
+        tanggal: document.getElementById('tanggal').value,
+        inv: document.getElementById('inv').value,
+        plat: document.getElementById('plat').value,
+        lokasi: document.getElementById('lokasi').value,
+        jamMulai: document.getElementById('jamMulai').value,
+        jamSelesai: document.getElementById('jamSelesai').value,
+        catatan: document.getElementById('catatan').value
+      };
+
+      if (currentEditIndex !== null) {
+        updateData(currentEditIndex, formData);
+      } else {
+        saveData(formData);
+      }
+    });
+
+    function showLoading(show) {
+      document.getElementById('loading').style.display = show ? 'block' : 'none';
+    }
+
+    function showMessage(message, type) {
+      const msgEl = document.getElementById('message');
+      msgEl.textContent = message;
+      msgEl.className = 'message ' + type;
+      msgEl.style.display = 'block';
+      
+      setTimeout(() => {
+        msgEl.style.display = 'none';
+      }, 5000);
+    }
+
+    function saveData(data) {
+      showLoading(true);
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify(data)
+      })
+      .then(response => response.text())
+      .then(result => {
+        showLoading(false);
+        showMessage(result, 'success');
+        resetForm();
+        loadData();
+      })
+      .catch(error => {
+        showLoading(false);
+        showMessage('Error: ' + error, 'error');
+      });
+    }
+
+    function loadData() {
+      showLoading(true);
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({ action: 'get' })
+      })
+      .then(response => response.json())
+      .then(data => {
+        showLoading(false);
+        allData = data;
+        displayData(data);
+        updateStats(data);
+      })
+      .catch(error => {
+        showLoading(false);
+        showMessage('Error loading data: ' + error, 'error');
+      });
+    }
+
+    function displayData(data) {
+      const tbody = document.getElementById('dataTableBody');
+      
+      if (data.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="9" style="text-align: center; padding: 40px; color: #6c757d;">Tidak ada data</td></tr>';
+        return;
+      }
+
+      tbody.innerHTML = '';
+data.forEach((row, index) => {
+  const tr = document.createElement('tr');
+
+  // Format tanggal (row[1])
+  const tgl = row[1] ? new Date(row[1]).toLocaleDateString('id-ID') : '';
+
+  // Format waktu (row[5] dan row[6])
+  const jamMulai = row[5]
+    ? new Date(row[5]).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
+    : '';
+  const jamSelesai = row[6]
+    ? new Date(row[6]).toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', hour12: false })
+    : '';
+
+  tr.innerHTML = `
+    <td>${row[0] || ''}</td>
+    <td>${tgl}</td>
+    <td>${row[2] || ''}</td>
+    <td>${row[3] || ''}</td>
+    <td>${row[4] || ''}</td>
+    <td>${jamMulai}</td>
+    <td>${jamSelesai}</td>
+    <td>${row[7] || ''}</td>
+    <td>
+      <div class="action-buttons">
+        <button class="btn btn-primary btn-sm" onclick="editData(${index})">✏️ Edit</button>
+        <button class="btn btn-danger btn-sm" onclick="deleteData(${index})">🗑️ Hapus</button>
+      </div>
+    </td>
+  `;
+
+  tbody.appendChild(tr);
+});
+}
+    function editData(index) {
+      currentEditIndex = index;
+      const row = allData[index];
+      
+      document.getElementById('formTitle').textContent = '✏️ Edit Data Kendaraan';
+      document.getElementById('tanggal').value = row[1] || '';
+      document.getElementById('inv').value = row[2] || '';
+      document.getElementById('plat').value = row[3] || '';
+      document.getElementById('lokasi').value = row[4] || '';
+      document.getElementById('jamMulai').value = row[5] || '';
+      document.getElementById('jamSelesai').value = row[6] || '';
+      document.getElementById('catatan').value = row[7] || '';
+      
+      document.querySelector('.form-section').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    function updateData(index, data) {
+      showLoading(true);
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'update',
+          rowIndex: index,
+          data: data
+        })
+      })
+      .then(response => response.text())
+      .then(result => {
+        showLoading(false);
+        showMessage(result, 'success');
+        resetForm();
+        loadData();
+      })
+      .catch(error => {
+        showLoading(false);
+        showMessage('Error: ' + error, 'error');
+      });
+    }
+
+    function deleteData(index) {
+      if (!confirm('Apakah Anda yakin ingin menghapus data ini?')) {
+        return;
+      }
+      
+      showLoading(true);
+      
+      fetch(SCRIPT_URL, {
+        method: 'POST',
+        body: JSON.stringify({
+          action: 'delete',
+          rowIndex: index
+        })
+      })
+      .then(response => response.text())
+      .then(result => {
+        showLoading(false);
+        showMessage(result, 'success');
+        loadData();
+      })
+      .catch(error => {
+        showLoading(false);
+        showMessage('Error: ' + error, 'error');
+      });
+    }
+
+    function resetForm() {
+      document.getElementById('vehicleForm').reset();
+      document.getElementById('tanggal').valueAsDate = new Date();
+      currentEditIndex = null;
+      document.getElementById('formTitle').textContent = '📝 Tambah Data Kendaraan';
+    }
+
+    function refreshData() {
+      loadData();
+      showMessage('Data berhasil direfresh!', 'success');
+    }
+
+    function searchTable() {
+      const input = document.getElementById('searchInput').value.toLowerCase();
+      const filteredData = allData.filter(row => {
+        return row.some(cell => {
+          return cell.toString().toLowerCase().includes(input);
         });
-        
-        // Logout function
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            showLoginModal();
-            showMessage('👋 Anda telah logout. Sampai jumpa!', 'success');
-        }
+      });
+      displayData(filteredData);
+    }
 
-        // Handle form submission
-        document.getElementById('dataForm').addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const loading = document.getElementById('loading');
-            const submitBtn = document.getElementById('submitBtn');
-            const statusMessage = document.getElementById('statusMessage');
-            
-            // Show loading
-            loading.classList.add('show');
-            submitBtn.disabled = true;
-            
-            try {
-                const formData = new FormData(this);
-                
-                const response = await fetch(SCRIPT_URL, {
-                    method: 'POST',
-                    body: formData
-                });
-                
-                if (response.ok) {
-                    // Also save to localStorage for display
-                    saveToLocalStorage(formData);
-                    
-                    showMessage('✅ Data berhasil disimpan!', 'success');
-                    
-                    // Reset form if it's a new entry (not edit)
-                    if (!document.getElementById('row').value) {
-                        this.reset();
-                        // Set today's date again after reset
-                        const today = new Date().toISOString().split('T')[0];
-                        document.getElementById('tanggal').value = today;
-                    } else {
-                        // Clear edit mode
-                        document.getElementById('row').value = '';
-                        document.getElementById('submitBtn').textContent = '💾 Simpan Data';
-                    }
-                    
-                    // Refresh data display
-                    loadData();
-                } else {
-                    throw new Error('Gagal menyimpan data');
-                }
-                
-            } catch (error) {
-                console.error('Error:', error);
-                showMessage(' ', 'error');
-            } finally {
-                // Hide loading
-                loading.classList.remove('show');
-                submitBtn.disabled = false;
-            }
-        });
-
-        // Show status message
-        function showMessage(message, type) {
-            const statusMessage = document.getElementById('statusMessage');
-            statusMessage.textContent = message;
-            statusMessage.className = `p-4 rounded-lg text-center font-semibold ${
-                type === 'success' ? 'bg-green-100 text-green-800' : 'bg-red-100 text-red-800'
-            }`;
-            statusMessage.classList.remove('hidden');
-            
-            // Hide after 5 seconds
-            setTimeout(() => {
-                statusMessage.classList.add('hidden');
-            }, 5000);
-        }
-
-        // Clear form
-        function clearForm() {
-            document.getElementById('dataForm').reset();
-            document.getElementById('row').value = '';
-            document.getElementById('submitBtn').textContent = '💾 Simpan Data';
-        }
-
-        // Set current date and time
-        function setCurrentDateTime() {
-            const now = new Date();
-            
-            // Set current date
-            const today = now.toISOString().split('T')[0];
-            document.getElementById('tanggal').value = today;
-            
-            // Set current time for jam mulai
-            const currentTime = now.toTimeString().slice(0, 5);
-            document.getElementById('jamMulai').value = currentTime;
-        }
-
-        // Check URL parameters for edit mode
-        function checkEditMode() {
-            const urlParams = new URLSearchParams(window.location.search);
-            const row = urlParams.get('row');
-            
-            if (row) {
-                document.getElementById('row').value = row;
-                document.getElementById('submitBtn').textContent = '✏️ Update Data';
-                
-                // Fill form with URL parameters
-                ['tanggal', 'inv', 'plat', 'nomer', 'lokasi', 'jamMulai', 'jamSelesai', 'catatan'].forEach(field => {
-                    const value = urlParams.get(field);
-                    if (value) {
-                        document.getElementById(field).value = value;
-                    }
-                });
-            }
-        }
-
-        // Load data from Google Sheets
-        async function loadData() {
-            const loadingData = document.getElementById('loadingData');
-            const noData = document.getElementById('noData');
-            const dataTable = document.getElementById('dataTable');
-            const dataTableBody = document.getElementById('dataTableBody');
-            
-            // Show loading
-            loadingData.classList.remove('hidden');
-            noData.classList.add('hidden');
-            dataTable.classList.add('hidden');
-            
-            try {
-                // Google Sheets CSV export URL
-                const SHEET_ID = '1FO6iF8IBlTcl9AWVkqQO7lTct5C3avEb11gXeIllpuE';
-                const csvUrl = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=0`;
-                
-                const response = await fetch(csvUrl);
-                const csvText = await response.text();
-                
-                // Parse CSV data
-                const rows = csvText.split('\n').filter(row => row.trim());
-                const data = [];
-                
-                // Skip header row and parse data
-                for (let i = 1; i < rows.length; i++) {
-                    const columns = parseCSVRow(rows[i]);
-                    if (columns.length >= 8 && columns[0]) { // Check if row has data
-                        data.push({
-                            tanggal: formatDate(columns[0]),
-                            inv: columns[1] || '',
-                            plat: columns[2] || '',
-                            nomer: columns[3] || '',
-                            lokasi: columns[4] || '',
-                            jamMulai: formatTime(columns[5]),
-                            jamSelesai: formatTime(columns[6]),
-                            catatan: columns[7] || ''
-                        });
-                    }
-                }
-                
-                if (data.length === 0) {
-                    loadingData.classList.add('hidden');
-                    noData.classList.remove('hidden');
-                    return;
-                }
-                
-                // Clear existing data
-                dataTableBody.innerHTML = '';
-                
-                // Populate table
-                data.forEach((row, index) => {
-                    const jamText = row.jamMulai && row.jamSelesai ? 
-                        `${row.jamMulai} - ${row.jamSelesai}` : 
-                        (row.jamMulai || row.jamSelesai || '-');
-                    
-                    // Table row
-                    const tr = document.createElement('tr');
-                    tr.className = 'hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300 group';
-                    
-                    tr.innerHTML = `
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-medium text-gray-800 text-xs sm:text-sm">${row.tanggal || '-'}</td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-bold text-blue-700 text-xs sm:text-sm">${row.inv || '-'}</td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 font-mono text-gray-700 text-xs sm:text-sm">${row.plat || '-'}</td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">${row.nomer || '-'}</td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4">
-                            <span class="status-badge px-2 sm:px-3 py-1 sm:py-2 text-xs font-bold rounded-full ${
-                                row.lokasi === 'GIM' ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' : 
-                                row.lokasi === 'WKB' ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300' : 
-                                'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300'
-                            }">${row.lokasi || '-'}</span>
-                        </td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 hidden md:table-cell">${jamText}</td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 max-w-xs hidden lg:table-cell">
-                            <div class="truncate" title="${row.catatan || ''}">${row.catatan ? (row.catatan.length > 20 ? row.catatan.substring(0, 20) + '...' : row.catatan) : '-'}</div>
-                        </td>
-                        <td class="px-2 sm:px-4 py-3 sm:py-4">
-                            <button onclick="editData(${index + 2})" 
-                                    class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-all duration-300 border border-blue-200 hover:border-blue-300 text-xs sm:text-sm hover-lift">
-                                <span class="flex items-center">
-                                    <span class="mr-1">✏️</span>
-                                    <span class="hidden sm:inline">Edit</span>
-                                </span>
-                            </button>
-                        </td>
-                    `;
-                    dataTableBody.appendChild(tr);
-                });
-                
-                loadingData.classList.add('hidden');
-                dataTable.classList.remove('hidden');
-                
-            } catch (error) {
-                console.error('Error loading data:', error);
-                loadingData.classList.add('hidden');
-                
-                // Fallback to localStorage if Google Sheets fails
-                const savedData = JSON.parse(localStorage.getItem('vehicleData') || '[]');
-                if (savedData.length > 0) {
-                    // Clear existing data
-                    dataTableBody.innerHTML = '';
-                    
-                    // Show localStorage data as fallback
-                    savedData.forEach((row, index) => {
-                        const jamText = row.jamMulai && row.jamSelesai ? 
-                            `${row.jamMulai} - ${row.jamSelesai}` : 
-                            (row.jamMulai || row.jamSelesai || '-');
-                        
-                        // Table row
-                        const tr = document.createElement('tr');
-                        tr.className = 'hover:bg-gradient-to-r hover:from-blue-50/50 hover:to-indigo-50/50 transition-all duration-300 group';
-                        
-                        tr.innerHTML = `
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-medium text-gray-800 text-xs sm:text-sm">${row.tanggal || '-'}</td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-bold text-blue-700 text-xs sm:text-sm">${row.inv || '-'}</td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 font-mono text-gray-700 text-xs sm:text-sm">${row.plat || '-'}</td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-gray-600 text-xs sm:text-sm hidden sm:table-cell">${row.nomer || '-'}</td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4">
-                                <span class="status-badge px-2 sm:px-3 py-1 sm:py-2 text-xs font-bold rounded-full ${
-                                    row.lokasi === 'GIM' ? 'bg-gradient-to-r from-blue-100 to-blue-200 text-blue-800 border border-blue-300' : 
-                                    row.lokasi === 'WKB' ? 'bg-gradient-to-r from-green-100 to-green-200 text-green-800 border border-green-300' : 
-                                    'bg-gradient-to-r from-gray-100 to-gray-200 text-gray-800 border border-gray-300'
-                                }">${row.lokasi || '-'}</span>
-                            </td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm font-medium text-gray-700 hidden md:table-cell">${jamText}</td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4 text-xs sm:text-sm text-gray-600 max-w-xs hidden lg:table-cell">
-                                <div class="truncate" title="${row.catatan || ''}">${row.catatan ? (row.catatan.length > 20 ? row.catatan.substring(0, 20) + '...' : row.catatan) : '-'}</div>
-                            </td>
-                            <td class="px-2 sm:px-4 py-3 sm:py-4">
-                                <button onclick="editData(${index})" 
-                                        class="bg-gradient-to-r from-blue-50 to-blue-100 hover:from-blue-100 hover:to-blue-200 text-blue-700 font-semibold py-1 sm:py-2 px-2 sm:px-4 rounded-lg transition-all duration-300 border border-blue-200 hover:border-blue-300 text-xs sm:text-sm hover-lift">
-                                    <span class="flex items-center">
-                                        <span class="mr-1">✏️</span>
-                                        <span class="hidden sm:inline">Edit</span>
-                                    </span>
-                                </button>
-                            </td>
-                        `;
-                        dataTableBody.appendChild(tr);
-                    });
-                    dataTable.classList.remove('hidden');
-                } else {
-                    noData.classList.remove('hidden');
-                }
-            }
-        }
-        
-        // Helper functions for CSV parsing and formatting
-        function parseCSVRow(row) {
-            const result = [];
-            let current = '';
-            let inQuotes = false;
-            
-            for (let i = 0; i < row.length; i++) {
-                const char = row[i];
-                
-                if (char === '"') {
-                    inQuotes = !inQuotes;
-                } else if (char === ',' && !inQuotes) {
-                    result.push(current.trim());
-                    current = '';
-                } else {
-                    current += char;
-                }
-            }
-            
-            result.push(current.trim());
-            return result;
-        }
-        
-        function formatDate(dateStr) {
-            if (!dateStr) return '';
-            try {
-                const date = new Date(dateStr);
-                if (isNaN(date.getTime())) return dateStr;
-                return date.toISOString().split('T')[0];
-            } catch (e) {
-                return dateStr;
-            }
-        }
-        
-        function formatTime(timeStr) {
-            if (!timeStr) return '';
-            try {
-                // Handle various time formats
-                if (timeStr.includes(':')) {
-                    const parts = timeStr.split(':');
-                    if (parts.length >= 2) {
-                        const hours = parts[0].padStart(2, '0');
-                        const minutes = parts[1].padStart(2, '0');
-                        return `${hours}:${minutes}`;
-                    }
-                }
-                return timeStr;
-            } catch (e) {
-                return timeStr;
-            }
-        }
-        
-        // Edit data function
-        function editData(rowNumber) {
-            // Get the row data from the table
-            const tableRows = document.querySelectorAll('#dataTableBody tr');
-            const rowIndex = rowNumber - 2; // Adjust for header row
-            
-            if (rowIndex >= 0 && rowIndex < tableRows.length) {
-                const row = tableRows[rowIndex];
-                const cells = row.querySelectorAll('td');
-                
-                // Extract data from table cells
-                const tanggal = cells[0].textContent.trim();
-                const inv = cells[1].textContent.trim();
-                const plat = cells[2].textContent.trim();
-                const nomer = cells[3].textContent.trim();
-                const lokasi = cells[4].querySelector('span').textContent.trim();
-                const jamText = cells[5].textContent.trim();
-                const catatan = cells[6].textContent.trim();
-                
-                // Parse jam mulai and jam selesai
-                let jamMulai = '';
-                let jamSelesai = '';
-                if (jamText && jamText !== '-') {
-                    if (jamText.includes(' - ')) {
-                        const jamParts = jamText.split(' - ');
-                        jamMulai = jamParts[0].trim();
-                        jamSelesai = jamParts[1].trim();
-                    } else {
-                        jamMulai = jamText;
-                    }
-                }
-                
-                // Fill form with data
-                document.getElementById('tanggal').value = tanggal !== '-' ? tanggal : '';
-                document.getElementById('inv').value = inv !== '-' ? inv : '';
-                document.getElementById('plat').value = plat !== '-' ? plat : '';
-                document.getElementById('nomer').value = nomer !== '-' ? nomer : '';
-                document.getElementById('lokasi').value = lokasi !== '-' ? lokasi : '';
-                document.getElementById('jamMulai').value = jamMulai;
-                document.getElementById('jamSelesai').value = jamSelesai;
-                document.getElementById('catatan').value = catatan !== '-' ? catatan : '';
-                
-                // Set edit mode
-                document.getElementById('row').value = rowNumber;
-                document.getElementById('submitBtn').textContent = '✏️ Update Data';
-                
-                // Scroll to form
-                document.getElementById('dataForm').scrollIntoView({ behavior: 'smooth' });
-                
-                showMessage('📝 Data dimuat untuk diedit. Silakan ubah dan klik Update Data.', 'success');
-            } else {
-                showMessage('❌ Data tidak ditemukan untuk diedit.', 'error');
-            }
-        }
-        
-        // Save data to localStorage (for demo purposes)
-        function saveToLocalStorage(formData) {
-            const savedData = JSON.parse(localStorage.getItem('vehicleData') || '[]');
-            const newData = {
-                tanggal: formData.get('tanggal'),
-                inv: formData.get('inv'),
-                plat: formData.get('plat'),
-                nomer: formData.get('nomer'),
-                lokasi: formData.get('lokasi'),
-                jamMulai: formData.get('jamMulai'),
-                jamSelesai: formData.get('jamSelesai'),
-                catatan: formData.get('catatan')
-            };
-            
-            const rowIndex = formData.get('row');
-            if (rowIndex !== '' && rowIndex !== null) {
-                // Update existing data
-                savedData[parseInt(rowIndex)] = newData;
-            } else {
-                // Add new data
-                savedData.push(newData);
-            }
-            
-            localStorage.setItem('vehicleData', JSON.stringify(savedData));
-        }
-
-        // Initialize
-        document.addEventListener('DOMContentLoaded', function() {
-            // Check login status first
-            checkLoginStatus();
-            
-            checkEditMode();
-            loadData(); // Load data on page load
-            
-            // Set today's date as default
-            if (!document.getElementById('tanggal').value) {
-                const today = new Date().toISOString().split('T')[0];
-                document.getElementById('tanggal').value = today;
-            }
-        });
-    </script>
-    </body>
+    function updateStats(data) {
+      const gimCount = data.filter(row => row[4] === 'GIM').length;
+      const wkbCount = data.filter(row => row[4] === 'WKB').length;
+      
+      document.getElementById('totalVehicles').textContent = data.length;
+      document.getElementById('gimCount').textContent = gimCount;
+      document.getElementById('wkbCount').textContent = wkbCount;
+    }
+  </script>
+</body>
 </html>
